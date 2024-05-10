@@ -99,7 +99,7 @@ void STWindow::RenderReflectorsConfiguration(float scale) {
   if (ImGui::BeginPopupModal("Reflectors Configuration", &temp, ImGuiWindowFlags_AlwaysAutoResize)) {
     if (ImGui::Button("Select Log Directory")) {
       auto dir = pfd::select_folder("Choose logs directory", pfd::path::home()).result();
-      strcpy_s(_rc_logs_dir, dir.c_str());
+      strcpy(_rc_logs_dir, dir.c_str());
     }
 
     ImGui::SameLine();
