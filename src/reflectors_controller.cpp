@@ -1,7 +1,6 @@
 #include "reflectors_controller.hpp"
 
 #include <spdlog/spdlog.h>
-#include <windows.h>
 
 #include <chrono>
 #include <commands/load_configuration_command.hpp>
@@ -160,20 +159,20 @@ void ReflectorsController::ControllerThreadExecute() {
     ExecuteCommands();
 
     time_t time_t;
-    struct tm utc_time {};
-    struct tm local_time {};
+    struct tm* utc_time {};
+    struct tm* local_time {};
 
     time(&time_t);
-    localtime_s(&local_time, &time_t);
-    gmtime_s(&utc_time, &time_t);
+    local_time = localtime(&time_t);
+    utc_time = gmtime(&time_t);
 
-    double d = 30.44 * ((double)utc_time.tm_mon) + (double)utc_time.tm_mday;
+    double d = 30.44 * ((double)utc_time->tm_mon) + (double)utc_time->tm_mday;
     double B = 2.00 * M_PI * (d - 81.00) / 365.0;
     double delta = 23.45 * std::sin(B);
     double delta_rad = delta / 360.00 * 2.00 * M_PI;
     double EoT = 9.87 * std::sin(2 * B) - 7.53 * std::cos(B) - 1.5 * std::sin(B);
     double time_diff_long_hour = (4.00 * _longitude + EoT) / 60.00;
-    double time_utc_dec = (double)utc_time.tm_hour + (double)utc_time.tm_min / 60.00;
+    double time_utc_dec = (double)utc_time->tm_hour + (double)utc_time->tm_min / 60.00;
     double solar_time_dec = time_utc_dec + time_diff_long_hour;
     double fhra = 15.00 * (solar_time_dec - 12.00);
 
@@ -211,7 +210,7 @@ void ReflectorsController::ControllerThreadExecute() {
     double azimuth_deg = azimuth / 2.00 / M_PI * 360;
     if (hra > 0) { azimuth_deg = 360.00 - azimuth_deg; }
 
-    _data_observer->OnASTLocalTime(local_time.tm_hour, local_time.tm_min);
+    _data_observer->OnASTLocalTime(local_time->tm_hour, local_time->tm_min);
     _data_observer->OnASTSystemTime((int)(std::floor(solar_time_dec)), (int)(std::floor(std::fmod(solar_time_dec, 1) * 60.00)));
     _data_observer->OnASTSunAzimuth(azimuth_deg);
     _data_observer->OnASTSunElevation(alpha_deg);

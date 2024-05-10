@@ -4,6 +4,6 @@
         "conan": {}
     },
     "include": [
-        "D:\\Projects\\Fiverr\\VoltirisSTLinux\\build\\generators\\CMakePresets.json"
+        "/mnt/d/Projects/Fiverr/VoltirisSTLinux/build_arm/build/Release/generators/CMakePresets.json"
     ]
 }
