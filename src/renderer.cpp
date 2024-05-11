@@ -65,13 +65,25 @@ bool Renderer::Cleanup() {
 }
 
 bool Renderer::Run(STWindow& st_window) {
+  const auto max_frame_time = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::seconds(1)) / 30;
+
   // Main rendering loop
   while (!glfwWindowShouldClose(_window)) {
+    auto start = std::chrono::high_resolution_clock::now();
+
     FramePreprocessing();
 
     st_window.Render(_current_scale);
 
     FramePostprocessing();
+
+    auto frame_time = std::chrono::high_resolution_clock::now() - start;
+    auto sleep_time = max_frame_time - frame_time;
+
+    if(sleep_time.count() > 0) {
+      //spdlog::info("Sleep renderer for {} ms.", sleep_time.count());
+      std::this_thread::sleep_for(sleep_time);
+    }
   }
 
   return true;

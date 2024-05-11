@@ -148,6 +148,8 @@ void ReflectorsController::ProcessCommand(const ValuesUpdateCommand &command) {
 }
 
 void ReflectorsController::ControllerThreadExecute() {
+  const auto max_frame_time = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::seconds(1)) / 30;
+
   double hra = 0;
   double hrar = 0;
 
@@ -156,6 +158,7 @@ void ReflectorsController::ControllerThreadExecute() {
   double hra_star = 90;
 
   while (_is_working) {
+    auto start = std::chrono::high_resolution_clock::now();
     ExecuteCommands();
 
     time_t time_t;
@@ -210,7 +213,6 @@ void ReflectorsController::ControllerThreadExecute() {
     double azimuth_deg = azimuth / 2.00 / M_PI * 360;
     if (hra > 0) { azimuth_deg = 360.00 - azimuth_deg; }
 
-    spdlog::info("Local time: {}h{}m; System time: {}h{}m", local_time->tm_hour, local_time->tm_min, (int)(std::floor(solar_time_dec)), (int)(std::floor(std::fmod(solar_time_dec, 1) * 60.00)));
     _data_observer->OnASTLocalTime(local_time->tm_hour, local_time->tm_min);
     _data_observer->OnASTSystemTime((int)(std::floor(solar_time_dec)), (int)(std::floor(std::fmod(solar_time_dec, 1) * 60.00)));
     _data_observer->OnASTSunAzimuth(azimuth_deg);
@@ -267,6 +269,13 @@ void ReflectorsController::ControllerThreadExecute() {
         _data_observer->OnRDReflectorThPositionElevationMm(reflector.ref_id - 1, reflector.reflector_th_position_elevation);
         _data_observer->OnRDReflectorThPositionElevationDeg(reflector.ref_id - 1, reflector.ConvertEL_Mm2DegTh(reflector.reflector_th_position_elevation));
       }
+    }
+    auto frame_time = std::chrono::high_resolution_clock::now() - start;
+    auto sleep_time = max_frame_time - frame_time;
+
+    if(sleep_time.count() > 0) {
+      //spdlog::info("Sleep controller for {} ms.", sleep_time.count());
+      std::this_thread::sleep_for(sleep_time);
     }
   }
 }
