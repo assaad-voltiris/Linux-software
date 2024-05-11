@@ -4,3 +4,6 @@ cmake-build*/
 .idea/
 
 bindings/
+
+CMakeUserPresets.json
+imgui.ini

@@ -41,6 +41,8 @@ STWindow::STWindow(ReflectorsCommandsObserver &commands_observer) : _commands_ob
   initial_updates.emplace_back(ValuesUpdateCommand::ValueId::kLatitude, _ast_latitude);
   initial_updates.emplace_back(ValuesUpdateCommand::ValueId::kLongitude, _ast_longitude);
   _commands_observer.OnCommand(std::make_unique<ValuesUpdateCommand>(initial_updates));
+
+  spdlog::info("Dialogs availability: {}", pfd::settings::available());
 }
 
 void STWindow::OnError(const std::string &error_string) { _current_error = error_string; }
