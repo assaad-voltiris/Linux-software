@@ -290,7 +290,7 @@ void STWindow::RenderAutomaticSunTracking(float scale) {
   ImGui::InputInt("##count_cycles", &_ast_count_cycles);
   ImGui::EndDisabled();
 
-  ImGui::Text("LT %02lluh%02llum, ST %02lluh%02llum", _ast_local_time_h, _ast_local_time_m, _ast_system_time_h, _ast_system_time_m);
+  ImGui::Text("LT %02dh%02dm, ST %02dh%02dm", _ast_local_time_h, _ast_local_time_m, _ast_system_time_h, _ast_system_time_m);
   ImGui::Text("Sun AZ %3.3f° / EL %3.3f°", _ast_sun_azimuth, _ast_sun_elevation);
   ImGui::Text("Ref AZ %3.3f° / EL %3.3f°", _ast_sun_ref_azimuth, _ast_sun_ref_elevation);
   ImGui::Text("hra %3.3f° / hrar %3.3f°", _ast_hra, _ast_hrar);

@@ -210,6 +210,7 @@ void ReflectorsController::ControllerThreadExecute() {
     double azimuth_deg = azimuth / 2.00 / M_PI * 360;
     if (hra > 0) { azimuth_deg = 360.00 - azimuth_deg; }
 
+    spdlog::info("Local time: {}h{}m; System time: {}h{}m", local_time->tm_hour, local_time->tm_min, (int)(std::floor(solar_time_dec)), (int)(std::floor(std::fmod(solar_time_dec, 1) * 60.00)));
     _data_observer->OnASTLocalTime(local_time->tm_hour, local_time->tm_min);
     _data_observer->OnASTSystemTime((int)(std::floor(solar_time_dec)), (int)(std::floor(std::fmod(solar_time_dec, 1) * 60.00)));
     _data_observer->OnASTSunAzimuth(azimuth_deg);

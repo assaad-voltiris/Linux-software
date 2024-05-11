@@ -24,11 +24,11 @@ class STWindow : public ReflectorsDataObserver {
 
   void OnASTLatitude(double value) override { _ast_latitude = value; }
   void OnASTLongitude(double value) override { _ast_longitude = value; }
-  void OnASTLocalTime(std::size_t hours, std::size_t minutes) override {
+  void OnASTLocalTime(std::int32_t hours, std::int32_t minutes) override {
     _ast_local_time_h = hours;
     _ast_local_time_m = minutes;
   }
-  void OnASTSystemTime(std::size_t hours, std::size_t minutes) override {
+  void OnASTSystemTime(std::int32_t hours, std::int32_t minutes) override {
     _ast_system_time_h = hours;
     _ast_system_time_m = minutes;
   }
@@ -113,10 +113,10 @@ class STWindow : public ReflectorsDataObserver {
   double _ast_longitude = Resources::kASTLongitudeDefaultValue;
   std::int32_t _ast_count_cycles = Resources::kASTCountCyclesDefaultValue;
 
-  std::size_t _ast_local_time_h = 0;
-  std::size_t _ast_local_time_m = 0;
-  std::size_t _ast_system_time_h = 0;
-  std::size_t _ast_system_time_m = 0;
+  std::int32_t _ast_local_time_h = 0;
+  std::int32_t _ast_local_time_m = 0;
+  std::int32_t _ast_system_time_h = 0;
+  std::int32_t _ast_system_time_m = 0;
   double _ast_sun_azimuth = 0;
   double _ast_sun_elevation = 0;
   double _ast_sun_ref_azimuth = 0;

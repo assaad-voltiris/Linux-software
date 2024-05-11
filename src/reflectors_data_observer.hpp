@@ -10,8 +10,8 @@ public:
 
   virtual void OnASTLatitude(double value) = 0;
   virtual void OnASTLongitude(double value) = 0;
-  virtual void OnASTLocalTime(std::size_t hours, std::size_t minutes) = 0;
-  virtual void OnASTSystemTime(std::size_t hours, std::size_t minutes) = 0;
+  virtual void OnASTLocalTime(std::int32_t hours, std::int32_t minutes) = 0;
+  virtual void OnASTSystemTime(std::int32_t hours, std::int32_t minutes) = 0;
   virtual void OnASTSunAzimuth(double value) = 0;
   virtual void OnASTSunElevation(double value) = 0;
   virtual void OnASTSunRefAzimuth(double value) = 0;
