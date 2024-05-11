@@ -148,7 +148,7 @@ void ReflectorsController::ProcessCommand(const ValuesUpdateCommand &command) {
 }
 
 void ReflectorsController::ControllerThreadExecute() {
-  const auto max_frame_time = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::seconds(1)) / 30;
+  const auto max_frame_time = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::seconds(1)) / 5;
 
   double hra = 0;
   double hrar = 0;
