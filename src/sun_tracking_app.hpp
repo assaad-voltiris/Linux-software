@@ -1,8 +1,8 @@
 #pragma once
 
-#include <reflectors_controller.hpp>
-#include <renderer.hpp>
-#include <st_window.hpp>
+#include <controller/reflectors_controller.hpp>
+#include <presentation/ui/renderer.hpp>
+#include <presentation/ui/st_window.hpp>
 
 namespace voltiris {
 
@@ -18,10 +18,10 @@ public:
   bool Cleanup();
 
 private:
-  ReflectorsController _controller;
+  controller::ReflectorsController _controller;
 
-  Renderer _renderer;
-  STWindow _window;
+  presentation::ui::Renderer _renderer;
+  presentation::ui::STWindow _window;
 };
 
-}
+}  // namespace voltiris

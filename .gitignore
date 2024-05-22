@@ -1,9 +1,9 @@
 build/
+build_*/
 build_arm/
 cmake-build*/
 .idea/
 
 bindings/
 
-CMakeUserPresets.json
 imgui.ini

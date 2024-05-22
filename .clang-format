@@ -3,5 +3,7 @@ BasedOnStyle: Google
 AllowShortBlocksOnASingleLine: 'true'
 AllowShortIfStatementsOnASingleLine: Always
 ColumnLimit: '160'
+AccessModifierOffset: '-2'
+IncludeBlocks: Preserve
 
 ...

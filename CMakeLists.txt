@@ -4,15 +4,27 @@ project(VoltirisST VERSION 1.0.0 LANGUAGES CXX)
 
 add_executable(${PROJECT_NAME}
         src/main.cpp
-
-        src/renderer.cpp
-        src/st_window.cpp
         src/sun_tracking_app.cpp
-        src/reflectors_controller.cpp
-        src/rs485.cpp
-        src/arduino_mega.cpp
 
-        src/resources.cpp
+        src/presentation/ui/renderer.cpp
+        src/presentation/ui/resources.cpp
+        src/presentation/ui/st_window.cpp
+        src/presentation/ui/window_components/accelerated_tracking_settings_window_component.cpp
+        src/presentation/ui/window_components/automatic_sun_tracking_window_component.cpp
+        src/presentation/ui/window_components/calibration_position_window_component.cpp
+        src/presentation/ui/window_components/configuration_window_component.cpp
+        src/presentation/ui/window_components/error_window_component.cpp
+        src/presentation/ui/window_components/manual_reflectors_alignment_window_component.cpp
+        src/presentation/ui/window_components/menu_window_component.cpp
+        src/presentation/ui/window_components/reflectors_data_window_component.cpp
+
+        src/controller/reflectors_controller.cpp
+        src/controller/utils/communication.cpp
+        src/controller/utils/converters.cpp
+        src/controller/utils/reflector.cpp
+        src/controller/utils/sun_math.cpp
+        src/controller/utils/time.cpp
+
         # ImGui impl bindings
         bindings/imgui_impl_glfw.cpp
         bindings/imgui_impl_opengl2.cpp
