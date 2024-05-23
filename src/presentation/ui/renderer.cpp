@@ -57,7 +57,7 @@ bool Renderer::Cleanup() {
 }
 
 bool Renderer::Run(STWindow &st_window) {
-  const auto max_frame_time = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::seconds(1)) / 60;
+  const auto max_frame_time = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::seconds(1)) / 10;
 
   // Main rendering loop
   while (!glfwWindowShouldClose(_window)) {
@@ -74,7 +74,7 @@ bool Renderer::Run(STWindow &st_window) {
 
     if (sleep_time.count() > 0) {
       // spdlog::info("Sleep renderer for {} ns.", sleep_time.count());
-      // std::this_thread::sleep_for(sleep_time);
+      std::this_thread::sleep_for(sleep_time);
     }
   }
 

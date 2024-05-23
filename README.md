@@ -4,7 +4,7 @@
    ```
    sudo apt install cmake pkg-config
    pip install conan --break-system-packages
-   ```
+   ```[build.sh](scripts%2Fbuild.sh)
    
 # Install dependencies
 
@@ -12,8 +12,8 @@
    ```sudo apt install kdialog```
 
 # Build project
-
-1. Clone project ```git clone git@github.com:assaad-voltiris/Linux-software.git```
-2. Navigate to project folder
-3. Build project ```conan build . -of build --build=missing -c tools.system.package_manager:mode=install -c tools.system.package_manager:sudo=True```
-4. Run project ```./build/build/Release/VoltirisST```
+1. (Optional) Create default conan profile (```conan profile detect```)
+2. Clone project ```git clone https://github.com/assaad-voltiris/Linux-software.git```
+3. Navigate to project folder
+4. Build project ```conan build . -of build --build=missing -c tools.system.package_manager:mode=install -c tools.system.package_manager:sudo=True```
+5. Run project ```./build/build/Release/VoltirisST```

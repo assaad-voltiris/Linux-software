@@ -4,6 +4,7 @@ build_arm/
 cmake-build*/
 .idea/
 bin/
+scripts/Linux-software/
 
 bindings/
 
