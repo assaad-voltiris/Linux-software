@@ -4,7 +4,11 @@
 #include <termios.h>
 #include <unistd.h>
 
+#include <algorithm>
+#include <filesystem>
+#include <iostream>
 #include <stdexcept>
+#include <string>
 
 namespace voltiris::controller::utils {
 
@@ -12,7 +16,23 @@ namespace {
 #define BAUDRATE B9600  // Baudrate (can be changed as needed)
 }  // namespace
 
-std::vector<std::string> GetAvailablePorts() { return {"/dev/ttyS5"}; }
+std::vector<std::string> GetAvailablePorts() {
+  std::vector<std::string> port_names;
+
+  std::filesystem::path p("/dev/");
+  if (!exists(p)) {
+    throw std::runtime_error(p.generic_string() + " does not exist");
+  } else {
+    for (const auto& de : std::filesystem::directory_iterator(p)) {
+      std::cout << de.path().generic_string() << std::endl;
+      if (de.path().generic_string().find("ttyS") != std::string::npos) { port_names.push_back(de.path().generic_string()); }
+    }
+  }
+  std::sort(port_names.begin(), port_names.end());
+  return port_names;
+
+  return {"/dev/ttyS5"};
+}
 
 std::int32_t Connect(const std::string& port_name) {
   std::int32_t com_port = open(port_name.c_str(), O_RDWR | O_NOCTTY | O_NDELAY);
