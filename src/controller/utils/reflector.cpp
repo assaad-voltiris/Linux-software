@@ -2,6 +2,8 @@
 
 #include <fstream>
 
+#include <spdlog/spdlog.h>
+
 #include <controller/reflector_state.hpp>
 #include <controller/utils/communication.hpp>
 
@@ -84,10 +86,12 @@ bool WakeUp(std::int32_t com_port, ReflectorState& reflector) {
   // clang-format on
 
   for (std::size_t attempts = 0; attempts < kMaxAttempts; ++attempts) {
+    spdlog::debug("Sending wake up command for reflector: {} - {}", reflector.com_id, reflector.id);
     if (Send(com_port, kSendMsgFormat, reflector.com_id)) {
       double FW = 0.0;
       char useless[200];
 
+      spdlog::debug("Reading after wake up command for reflector: {} - {}", reflector.com_id, reflector.id);
       if (Read(com_port, kReadMsgFormat, &FW, useless) == 2) {
         reflector.firmware = FW;
         return true;
@@ -103,6 +107,7 @@ bool Initialize(std::int32_t com_port, ReflectorState& reflector) {
   static auto kReadMsgFormat = "Mem8[0]: %u, Mem8[1]: %u, VMem32[0]: %u, VMem32[1]: %u, Mem16[0]: %u, Mem16[1]: %u,Mem16[2]: %u, Mem16[3]: %u,Mem16[4]: %u";
   // clang-format on
 
+  spdlog::debug("Sending initialize command for reflector: {} - {}", reflector.com_id, reflector.id);
   if (!Send(com_port, kSendMsgFormat, reflector.com_id)) { throw std::runtime_error("Initialize message sending error."); }
 
   std::int32_t a8 = 0, b8 = 0, a32 = 0, b32 = 0, a16 = 0, b16 = 0, c16 = 0, d16 = 0, e16 = 0;
@@ -111,6 +116,7 @@ bool Initialize(std::int32_t com_port, ReflectorState& reflector) {
 
   std::int32_t read_values = Read(com_port, kReadMsgFormat, &a8, &b8, &a32, &b32, &a16, &b16, &c16, &d16, &e16);
   while (read_values <= 4 && std::chrono::high_resolution_clock::now() - start < kDelayRead) {
+    spdlog::debug("Reading after initialize command for reflector: {} - {}", reflector.com_id, reflector.id);
     read_values = Read(com_port, kReadMsgFormat, &a8, &b8, &a32, &b32, &a16, &b16, &c16, &d16, &e16);
   }
 
@@ -131,10 +137,12 @@ bool ReadPositioningData(std::int32_t com_port, ReflectorState& reflector) {
   // clang-format on
 
   for (std::size_t attempts = 0; attempts < kMaxAttempts; ++attempts) {
+    spdlog::debug("Sending request positions command for reflector: {} - {}", reflector.com_id, reflector.id);
     if (Send(com_port, kSendMsgFormat, reflector.com_id, reflector.line_num)) {
       double read_pos_az = 0.0, read_pos_el = 0.0;
       std::int32_t read_error = 0, read_error2 = 0, read_mb = 0, read_vb = 0;
 
+      spdlog::debug("Reading after request positions command for reflector: {} - {}", reflector.com_id, reflector.id);
       if (Read(com_port, kReadMsgFormat, &read_vb, &read_mb, &read_error, &read_error2, &read_pos_az, &read_pos_el) == 6) {
         reflector.actual_position_elevation_mm = read_pos_el;
         reflector.actual_position_azimuth_mm = read_pos_az;
@@ -152,6 +160,7 @@ bool SetHall(std::int32_t com_port, ReflectorState& reflector){
   static auto kSendMsgFormat = "R%d H%f\r\n";
   // clang-format on
 
+  spdlog::debug("Sending set hall command for reflector: {} - {}", reflector.com_id, reflector.id);
   return Send(com_port, kSendMsgFormat, reflector.com_id, reflector.hall_spacing);
 }
 
