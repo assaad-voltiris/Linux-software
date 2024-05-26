@@ -37,7 +37,7 @@ std::int32_t Connect(const std::string& port_name) {
   if (com_port == -1) { throw std::runtime_error("Unable to open port."); }
 
   termios serial = {};
-  serial.c_cflag = B9600 | CS8 | CLOCAL | CREAD;
+  serial.c_cflag = CS8 | CLOCAL | CREAD;
   serial.c_iflag = IGNPAR;
   serial.c_oflag = 0;
   serial.c_lflag = 0;
