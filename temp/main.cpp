@@ -42,18 +42,24 @@ int main() {
 
   // Configure serial port
   memset(&serial, 0, sizeof(serial));
-  serial.c_cflag = CS8 | CLOCAL | CREAD;
-  serial.c_iflag = IGNPAR;
-  serial.c_oflag = 0;
-  serial.c_lflag = 0;
+  serial.c_cflag &= ~CSIZE;
+  serial.c_cflag &= ~PARENB;
+  serial.c_cflag &= ~CSTOPB;
+  serial.c_cflag &= ~CRTSCTS;
+  serial.c_cflag |= CS8;
+  serial.c_cflag |= CREAD | CLOCAL;
 
   serial.c_lflag &= ~ICANON;
   serial.c_lflag &= ~ISIG;
+
+  serial.c_iflag &= ~(IXON | IXOFF | IXANY); // Turn off s/w flow ctrl
+  serial.c_iflag &= ~(IGNBRK|BRKINT|PARMRK|ISTRIP|INLCR|IGNCR|ICRNL); // Disable any special handling of received bytes
 
   serial.c_oflag &= ~OPOST; // Prevent special interpretation of output bytes (e.g. newline chars)
   serial.c_oflag &= ~ONLCR; // Prevent conversion of newline to carriage return/line feed
 
   cfsetspeed(&serial, B9600);
+
   tcflush(fd, TCIFLUSH);
   tcsetattr(fd, TCSANOW, &serial);
 
