@@ -7,7 +7,7 @@
 
 namespace voltiris::controller::utils {
 
-constexpr std::size_t kBufferSize = 255;
+constexpr std::size_t kBufferSize = 512;
 constexpr std::chrono::milliseconds kDelayRead{200};
 constexpr std::chrono::milliseconds kDelayWrite{50};
 
