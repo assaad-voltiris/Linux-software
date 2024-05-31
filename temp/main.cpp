@@ -43,7 +43,7 @@ int main() {
   // Configure serial port
   memset(&serial, 0, sizeof(serial));
   serial.c_cflag &= ~CSIZE;
-  serial.c_cflag &= ~PARENB;
+  serial.c_cflag |= PARENB;
   serial.c_cflag &= ~CSTOPB;
   serial.c_cflag &= ~CRTSCTS;
   serial.c_cflag |= CS8;
@@ -87,6 +87,7 @@ int main() {
       return 1;
     }
     printf("Message sent: %s\n", send_buffer);
+    sleep(1000);
   }
 
   // Close serial port (this part will not be reached in the infinite loop)
