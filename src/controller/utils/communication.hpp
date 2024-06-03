@@ -27,7 +27,7 @@ bool Send(std::int32_t port_handler, const std::string& msg_fmt, Args... args) {
   return Send(port_handler, buffer);
 }
 
-bool Read(std::int32_t port_handler, std::string& msg);
+bool Read(std::int32_t port_handler, std::string& msg, const std::chrono::milliseconds& timeout = std::chrono::milliseconds(200));
 
 template <typename... Args>
 std::int32_t Read(std::int32_t port_handler, const std::string& msg_fmt, Args... args) {
@@ -35,8 +35,7 @@ std::int32_t Read(std::int32_t port_handler, const std::string& msg_fmt, Args...
 
   if (!Read(port_handler, msg)) { return -1; }
 
-  bool is_read = sscanf(msg.c_str(), msg_fmt.c_str(), args...);
-  return is_read;
+  return sscanf(msg.c_str(), msg_fmt.c_str(), args...);
 }
 
 }  // namespace voltiris::controller::utils
