@@ -23,7 +23,10 @@ std::vector<std::string> GetAvailablePorts() {
   if (!exists(p)) { throw std::runtime_error(p.generic_string() + " does not exist"); }
 
   for (const auto& de : std::filesystem::directory_iterator(p)) {
-    if (de.path().generic_string().find("ttyUSB") != std::string::npos) { port_names.push_back(de.path().generic_string()); }
+    auto path_str = de.path().generic_string();
+    if (path_str.find("ttyUSB") != std::string::npos || path_str.find("ttyS") != std::string::npos || path_str.find("ttyACM") != std::string::npos) {
+      port_names.push_back(de.path().generic_string());
+    }
   }
 
   std::sort(port_names.begin(), port_names.end());
