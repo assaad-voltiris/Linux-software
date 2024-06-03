@@ -27,7 +27,7 @@ bool Send(std::int32_t port_handler, const std::string& msg_fmt, Args... args) {
   return Send(port_handler, buffer);
 }
 
-bool Read(std::int32_t port_handler, std::string& msg, const std::chrono::milliseconds& timeout = std::chrono::milliseconds(200));
+bool Read(std::int32_t port_handler, std::string& msg, const std::chrono::milliseconds& timeout = std::chrono::milliseconds(1000));
 
 template <typename... Args>
 std::int32_t Read(std::int32_t port_handler, const std::string& msg_fmt, Args... args) {

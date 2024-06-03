@@ -95,16 +95,16 @@ bool Read(std::int32_t port_handler, std::string& msg, const std::chrono::millis
   std::size_t receive_buffer_begin = 0;
   std::size_t receive_buffer_end = 0;
 
-  while (!is_data_completed(receive_buffer, kBufferSize - receive_buffer_begin) && !is_timeout_reached(start_time)) {
+  while (!is_data_completed(receive_buffer, kBufferSize - receive_buffer_end) && !is_timeout_reached(start_time)) {
     if (kBufferSize <= receive_buffer_end) { throw std::runtime_error("Receive buffer overflow."); }
 
-    receive_buffer_end += read(port_handler, receive_buffer, kBufferSize - receive_buffer_begin);
+    receive_buffer_end += read(port_handler, receive_buffer, kBufferSize - receive_buffer_end);
     remove_n(receive_buffer, receive_buffer_begin, receive_buffer_end);
   }
 
   spdlog::debug("Received data: {}", receive_buffer);
 
-  return is_data_completed(receive_buffer, kBufferSize - receive_buffer_begin);
+  return is_data_completed(receive_buffer, kBufferSize - receive_buffer_end);
 }
 
 }  // namespace voltiris::controller::utils
