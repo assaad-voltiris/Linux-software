@@ -65,46 +65,31 @@ bool Read(std::int32_t port_handler, std::string& msg, const std::chrono::millis
 
   auto is_timeout_reached = [timeout](const auto& start_time) { return std::chrono::high_resolution_clock::now() - start_time >= timeout; };
 
-  auto remove_n = [](const char* buffer, std::size_t begin_index, std::size_t end_index) {
-    std::size_t block_start = begin_index, i = begin_index;
-    while (i <= end_index) {
-      if (buffer[i] == '\n' && i != end_index) {
-        ++i;
-      } else {
-        if (block_start != i) {
-          memmove((void*)&buffer[block_start], &buffer[i], end_index - i);
-
-          end_index = end_index - i + block_start;
-          memset((void*)&buffer[end_index], '\0', i - block_start);
-
-          i = block_start;
-        } else if (buffer[i] == '\r') {
-          block_start += 2;
-          i += 2;
-        } else {
-          ++block_start;
-          ++i;
-        }
-      }
-    }
+  auto clean_buffer = [](const char* buffer, std::size_t buffer_size) {
+    std::size_t non_zero_index = 0, zero_index = 0;
+    for (; buffer[non_zero_index] == '\0'; ++non_zero_index) {}
+    for (zero_index = non_zero_index; buffer[zero_index] != '\0'; ++zero_index) {}
+    memmove((void*)buffer, &buffer[non_zero_index], zero_index - non_zero_index);
+    memset((void*)&buffer[zero_index - non_zero_index], '\0', zero_index);
+    return zero_index - non_zero_index;
   };
 
   auto start_time = std::chrono::high_resolution_clock::now();
 
   char receive_buffer[kBufferSize] = {'\0'};
   std::size_t receive_buffer_begin = 0;
-  std::size_t receive_buffer_end = 0;
 
-  while (!is_data_completed(receive_buffer, kBufferSize - receive_buffer_end) && !is_timeout_reached(start_time)) {
-    if (kBufferSize <= receive_buffer_end) { throw std::runtime_error("Receive buffer overflow."); }
+  while (!is_data_completed(receive_buffer, receive_buffer_begin) && !is_timeout_reached(start_time)) {
+    if (kBufferSize <= receive_buffer_begin) { throw std::runtime_error("Receive buffer overflow."); }
 
-    receive_buffer_end += read(port_handler, receive_buffer, kBufferSize - receive_buffer_end);
-    remove_n(receive_buffer, receive_buffer_begin, receive_buffer_end);
+    read(port_handler, &receive_buffer[receive_buffer_begin], kBufferSize - receive_buffer_begin);
+    receive_buffer_begin = clean_buffer(receive_buffer, kBufferSize);
   }
 
-  spdlog::debug("Received data: {}", receive_buffer);
+  msg = receive_buffer;
+  spdlog::debug("Received data: {}", msg);
 
-  return is_data_completed(receive_buffer, kBufferSize - receive_buffer_end);
+  return is_data_completed(receive_buffer, receive_buffer_begin);
 }
 
 }  // namespace voltiris::controller::utils
