@@ -38,4 +38,13 @@ std::int32_t Read(std::int32_t port_handler, const std::string& msg_fmt, Args...
   return sscanf(msg.c_str(), msg_fmt.c_str(), args...);
 }
 
+template <typename... Args>
+bool Read(std::int32_t port_handler, const std::string& expected_str) {
+  std::string msg;
+
+  if (!Read(port_handler, msg)) { return false; }
+
+  return expected_str == msg;
+}
+
 }  // namespace voltiris::controller::utils

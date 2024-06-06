@@ -9,9 +9,13 @@
 
 #include <controller/commands/connect_command.hpp>
 #include <controller/commands/disconnect_command.hpp>
+#include <controller/commands/flash_command.hpp>
+#include <controller/commands/go_command.hpp>
 #include <controller/commands/initialization_command.hpp>
 #include <controller/commands/load_configuration_command.hpp>
 #include <controller/commands/read_command.hpp>
+#include <controller/commands/reboot_command.hpp>
+#include <controller/commands/set_position_command.hpp>
 #include <controller/commands/values_update_command.hpp>
 #include <controller/utils/communication.hpp>
 #include <controller/utils/converters.hpp>
@@ -173,6 +177,44 @@ void ReflectorsController::ProcessCommand(const ReadCommand &command) {
 
   if (!result) { throw std::runtime_error("Reflectors initialization error."); }
 }
+
+void ReflectorsController::ProcessCommand(const FlashCommand &command) {
+  if (_com_port == -1) { throw std::runtime_error("Reflectors not connected."); }
+
+  bool result = true;
+  for (auto &reflector : _reflectors) {
+    result &= utils::WakeUp(_com_port, reflector);
+    result &= utils::Flash(_com_port, reflector);
+  }
+
+  if (!result) { throw std::runtime_error("Reflectors initialization error."); }
+}
+
+void ReflectorsController::ProcessCommand(const RebootCommand &command) {
+  if (_com_port == -1) { throw std::runtime_error("Reflectors not connected."); }
+
+  bool result = true;
+  for (auto &reflector : _reflectors) {
+    result &= utils::WakeUp(_com_port, reflector);
+    result &= utils::Reboot(_com_port, reflector);
+  }
+
+  if (!result) { throw std::runtime_error("Reflectors initialization error."); }
+}
+
+void ReflectorsController::ProcessCommand(const SetPositionCommand &command) {
+  if (_com_port == -1) { throw std::runtime_error("Reflectors not connected."); }
+
+  bool result = true;
+  for (auto &reflector : _reflectors) {
+    result &= utils::WakeUp(_com_port, reflector);
+    result &= utils::SetPosition(_com_port, reflector, command.GetAzimuth(), command.GetElevation());
+    result &= utils::ReadPositioningData(_com_port, reflector);
+  }
+
+  if (!result) { throw std::runtime_error("Reflectors initialization error."); }
+}
+void ReflectorsController::ProcessCommand(const GoCommand &command) {}
 
 void ReflectorsController::ControllerThreadExecute() {
   const auto max_frame_time = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::seconds(1)) / 5;

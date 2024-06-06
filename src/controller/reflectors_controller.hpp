@@ -31,6 +31,10 @@ private:
   void ProcessCommand(const DisconnectCommand &command) override;
   void ProcessCommand(const InitializationCommand &command) override;
   void ProcessCommand(const ReadCommand &command) override;
+  void ProcessCommand(const FlashCommand &command) override;
+  void ProcessCommand(const RebootCommand &command) override;
+  void ProcessCommand(const SetPositionCommand &command) override;
+  void ProcessCommand(const GoCommand  &command) override;
 
 private:
   void ControllerThreadExecute();

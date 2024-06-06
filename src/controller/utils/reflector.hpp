@@ -18,4 +18,12 @@ bool ReadPositioningData(std::int32_t com_port, ReflectorState& reflector);
 
 bool SetHall(std::int32_t com_port, ReflectorState& reflector);
 
-}  // namespace voltiris::controller
+bool Flash(std::int32_t com_port, ReflectorState& reflector);
+
+bool Reboot(std::int32_t com_port, ReflectorState& reflector);
+
+bool SetPosition(std::int32_t com_port, ReflectorState& reflector, double azimuth, double elevation);
+
+bool Go(std::int32_t com_port, ReflectorState& reflector);
+
+}  // namespace voltiris::controller::utils

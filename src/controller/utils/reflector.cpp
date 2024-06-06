@@ -74,6 +74,8 @@ std::vector<ReflectorState> LoadReflectorsFromConfigurationFile(const std::strin
   }
   configuration_file.close();
 
+  std::sort(result.begin(), result.end(), [](const ReflectorState& lhs, const ReflectorState& rhs) { return lhs.id < rhs.id; });
+
   return result;
 }
 
@@ -155,7 +157,7 @@ bool ReadPositioningData(std::int32_t com_port, ReflectorState& reflector) {
   return false;
 }
 
-bool SetHall(std::int32_t com_port, ReflectorState& reflector){
+bool SetHall(std::int32_t com_port, ReflectorState& reflector) {
   // clang-format off
   static auto kSendMsgFormat = "R%d H%f\r\n";
   // clang-format on
@@ -163,5 +165,47 @@ bool SetHall(std::int32_t com_port, ReflectorState& reflector){
   spdlog::debug("Sending set hall command for reflector: {} - {}", reflector.com_id, reflector.id);
   return Send(com_port, kSendMsgFormat, reflector.com_id, reflector.hall_spacing);
 }
+
+bool Flash(std::int32_t com_port, ReflectorState& reflector) {
+  // clang-format off
+  static auto kSendMsgFormat = "R%d C\r\n";
+  // clang-format on
+
+  spdlog::debug("Sending flash command for reflector: {} - {}", reflector.com_id, reflector.id);
+  return Send(com_port, kSendMsgFormat, reflector.com_id);
+}
+
+bool Reboot(std::int32_t com_port, ReflectorState& reflector) {
+  constexpr static std::size_t kMaxAttempts = 10;
+
+  // clang-format off
+  static auto kSendMsgFormat = "R%d P\r\n";
+  static auto kReadMsg = "R";
+  // clang-format on
+
+  spdlog::debug("Sending reboot command for reflector: {} - {}", reflector.com_id, reflector.id);
+
+  if (Send(com_port, kSendMsgFormat, reflector.com_id)) {
+    for (std::size_t attempts = 0; attempts < kMaxAttempts; ++attempts) {
+      if (Read(com_port, kReadMsg)) { return true; }
+    }
+  }
+  return false;
+}
+
+bool SetPosition(std::int32_t com_port, ReflectorState& reflector, double azimuth, double elevation) {
+  // clang-format off
+  static auto kSendAzimuthMsgFormat = "R%d AZ%d%.2f\r\n";
+  static auto kSendElevationMsgFormat = "R%d EL%d%.2f\r\n";
+  // clang-format on
+
+  spdlog::debug("Sending flash command for reflector: {} - {}", reflector.com_id, reflector.id);
+  bool result = Send(com_port, kSendAzimuthMsgFormat, reflector.com_id, reflector.line_num, azimuth);
+  result &= Send(com_port, kSendElevationMsgFormat, reflector.com_id, reflector.line_num, elevation);
+
+  return result;
+}
+
+bool Go(std::int32_t com_port, ReflectorState& reflector) {}
 
 }  // namespace voltiris::controller::utils

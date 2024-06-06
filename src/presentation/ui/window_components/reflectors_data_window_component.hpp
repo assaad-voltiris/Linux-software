@@ -35,6 +35,10 @@ public:
 
 private:
   // RENDERING LOGIC
+  void RenderRealRow(const controller::ReflectorState& reflector_data, std::size_t i);
+  void RenderDummyRow(std::size_t id);
+
+  // RENDERING LOGIC
   bool _show_in_deg = false;
 
   struct ReflectorsControlValues {
