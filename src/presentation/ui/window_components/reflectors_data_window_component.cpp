@@ -70,6 +70,8 @@ void ReflectorsDataWindowComponent::Render(double scale) {
 }
 
 void ReflectorsDataWindowComponent::RenderRealRow(const controller::ReflectorState& reflector_data, std::size_t i) {
+  std::string set_name = "SET##" + std::to_string(i);
+  std::string go_name = "GO##" + std::to_string(i);
   std::string ctr_az_name = "##reflector_data_ctr_az" + std::to_string(i);
   std::string ctr_el_name = "##reflector_data_ctr_el" + std::to_string(i);
 
@@ -96,13 +98,13 @@ void ReflectorsDataWindowComponent::RenderRealRow(const controller::ReflectorSta
   ImGui::TableSetColumnIndex(9);
   ImGui::InputText(ctr_el_name.c_str(), _reflectors_control_data[i].position_elevation, IM_ARRAYSIZE(_reflectors_control_data[i].position_elevation));
   ImGui::TableSetColumnIndex(10);
-  if (ImGui::Button("SET")) {
+  if (ImGui::Button(set_name.c_str())) {
     char* end{};
     SendCommand(std::make_unique<controller::SetPositionCommand>(i, std::strtod(_reflectors_control_data[i].position_azimuth, &end),
                                                                  std::strtod(_reflectors_control_data[i].position_elevation, &end)));
   }
   ImGui::TableSetColumnIndex(11);
-  if (ImGui::Button("GO")) {
+  if (ImGui::Button(go_name.c_str())) {
     char* end{};
     SendCommand(std::make_unique<controller::GoCommand>(i, std::strtod(_reflectors_control_data[i].position_azimuth, &end),
                                                         std::strtod(_reflectors_control_data[i].position_elevation, &end)));
