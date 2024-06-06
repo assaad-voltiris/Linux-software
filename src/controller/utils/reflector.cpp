@@ -199,13 +199,24 @@ bool SetPosition(std::int32_t com_port, ReflectorState& reflector, double azimut
   static auto kSendElevationMsgFormat = "R%d EL%d%.2f\r\n";
   // clang-format on
 
-  spdlog::debug("Sending flash command for reflector: {} - {}", reflector.com_id, reflector.id);
+  spdlog::debug("Sending set position command for reflector: {} - {}", reflector.com_id, reflector.id);
   bool result = Send(com_port, kSendAzimuthMsgFormat, reflector.com_id, reflector.line_num, azimuth);
   result &= Send(com_port, kSendElevationMsgFormat, reflector.com_id, reflector.line_num, elevation);
 
   return result;
 }
 
-bool Go(std::int32_t com_port, ReflectorState& reflector) {}
+bool Go(std::int32_t com_port, ReflectorState& reflector, double azimuth, double elevation) {
+  // clang-format off
+  static auto kSendStep1MsgFormat = "R%d m\r\n";
+  static auto kSendStep2MsgFormat = "R%d %d %+06.2f,%+06.2f\r\n";
+  // clang-format on
+
+  spdlog::debug("Sending go command for reflector: {} - {}", reflector.com_id, reflector.id);
+  bool result = Send(com_port, kSendStep1MsgFormat, reflector.com_id);
+  result &= Send(com_port, kSendStep2MsgFormat, reflector.com_id, reflector.line_num, azimuth, elevation);
+
+  return result;
+}
 
 }  // namespace voltiris::controller::utils

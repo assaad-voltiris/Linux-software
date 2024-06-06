@@ -24,6 +24,6 @@ bool Reboot(std::int32_t com_port, ReflectorState& reflector);
 
 bool SetPosition(std::int32_t com_port, ReflectorState& reflector, double azimuth, double elevation);
 
-bool Go(std::int32_t com_port, ReflectorState& reflector);
+bool Go(std::int32_t com_port, ReflectorState& reflector, double azimuth, double elevation);
 
 }  // namespace voltiris::controller::utils

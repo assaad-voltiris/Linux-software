@@ -27,6 +27,8 @@ namespace voltiris::controller {
 
 namespace {
 
+static double kMaxSecu = 39.0;
+
 const int kNightSize = 24;
 const double kHRAReturnDefault[kNightSize] = {90.0, 82.5, 75,    67.5,  60.0,  52.5,  45.0,  37.5,  30.0,  22.5,  15.0,  7.5,
                                               1.0,  -7.5, -15.0, -22.5, -30.0, -37.5, -45.0, -52.5, -60.0, -67.5, -75.0, -82.5};
@@ -206,15 +208,50 @@ void ReflectorsController::ProcessCommand(const SetPositionCommand &command) {
   if (_com_port == -1) { throw std::runtime_error("Reflectors not connected."); }
 
   bool result = true;
-  for (auto &reflector : _reflectors) {
-    result &= utils::WakeUp(_com_port, reflector);
-    result &= utils::SetPosition(_com_port, reflector, command.GetAzimuth(), command.GetElevation());
-    result &= utils::ReadPositioningData(_com_port, reflector);
-  }
+
+  result &= utils::WakeUp(_com_port, _reflectors[command.GetReflectorIndex()]);
+  result &= utils::SetPosition(_com_port, _reflectors[command.GetReflectorIndex()], command.GetAzimuth(), command.GetElevation());
+  result &= utils::ReadPositioningData(_com_port, _reflectors[command.GetReflectorIndex()]);
 
   if (!result) { throw std::runtime_error("Reflectors initialization error."); }
 }
-void ReflectorsController::ProcessCommand(const GoCommand &command) {}
+void ReflectorsController::ProcessCommand(const GoCommand &command) {
+  if (_com_port == -1) { throw std::runtime_error("Reflectors not connected."); }
+
+  bool result = true;
+
+  auto &reflector = _reflectors[command.GetReflectorIndex()];
+
+  double azimuth = command.GetAzimuth();
+  double elevation = command.GetElevation();
+
+  do {
+    result &= utils::ReadPositioningData(_com_port, reflector);
+    if (!result) { throw std::runtime_error("Reflectors initial status reading error."); }
+
+    azimuth = command.GetAzimuth();
+    elevation = command.GetElevation();
+
+    if (std::abs(reflector.actual_position_azimuth_mm - command.GetAzimuth()) > kMaxSecu) {
+      azimuth = reflector.actual_position_azimuth_mm + (command.GetAzimuth() - reflector.actual_position_azimuth_mm) /
+                                                           std::abs(command.GetAzimuth() - reflector.actual_position_azimuth_mm) * (kMaxSecu - 1.00);
+    }
+    if (std::abs(reflector.actual_position_elevation_mm - command.GetElevation()) > kMaxSecu) {
+      elevation = reflector.actual_position_elevation_mm + (command.GetElevation() - reflector.actual_position_elevation_mm) /
+                                                               std::abs(command.GetElevation() - reflector.actual_position_elevation_mm) * (kMaxSecu - 1.00);
+    }
+
+    double direction_azimuth = azimuth - reflector.actual_position_azimuth_mm;
+    direction_azimuth = std::abs(direction_azimuth) > 0 ? direction_azimuth / std::abs(direction_azimuth) : 0;
+
+    double direction_elevation = elevation - reflector.actual_position_elevation_mm;
+    direction_elevation = std::abs(direction_elevation) > 0 ? direction_elevation / std::abs(direction_elevation) : 0;
+
+    result &= utils::Go(_com_port, reflector, azimuth, elevation);
+    result &= utils::ReadPositioningData(_com_port, reflector);
+    if (!result) { throw std::runtime_error("Reflectors movement error."); }
+  } while (azimuth != command.GetAzimuth() || (elevation != command.GetElevation()));
+}
 
 void ReflectorsController::ControllerThreadExecute() {
   const auto max_frame_time = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::seconds(1)) / 5;
