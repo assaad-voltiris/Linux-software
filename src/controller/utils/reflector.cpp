@@ -207,7 +207,7 @@ bool SetPosition(std::int32_t com_port, ReflectorState& reflector, double azimut
   return result;
 }
 
-bool Go(std::int32_t com_port, ReflectorState& reflector, double azimuth, double elevation) {
+bool Move(std::int32_t com_port, ReflectorState& reflector, double azimuth, double elevation) {
   // clang-format off
   static auto kSendStep1MsgFormat = "R%d m\r\n";
   static auto kSendStep2MsgFormat = "R%d %d %+06.2f,%+06.2f\r\n";

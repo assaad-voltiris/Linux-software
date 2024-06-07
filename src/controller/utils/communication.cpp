@@ -56,6 +56,8 @@ void Disconnect(std::int32_t port_handler) { close(port_handler); }
 bool Send(std::int32_t port_handler, const std::string& msg) {
   spdlog::debug("Data to send: {}", msg);
   if (write(port_handler, msg.c_str(), msg.size()) == -1) { return false; }
+  tcdrain(port_handler);
+  tcsendbreak(port_handler, 0);
   std::this_thread::sleep_for(std::chrono::milliseconds(200));
   return true;
 }

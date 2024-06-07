@@ -187,7 +187,10 @@ void ReflectorsController::ProcessCommand(const ReadCommand &command) {
   if (_com_port == -1) { throw std::runtime_error("Reflectors not connected."); }
 
   bool result = true;
-  for (auto &reflector : _reflectors) { result &= utils::ReadPositioningData(_com_port, reflector); }
+  for (auto &reflector : _reflectors) {
+    result &= utils::WakeUp(_com_port, reflector);
+    result &= utils::ReadPositioningData(_com_port, reflector);
+  }
 
   if (!result) { throw std::runtime_error("Reflectors initialization error."); }
 }
@@ -215,6 +218,7 @@ void ReflectorsController::ProcessCommand(const RebootCommand &command) {
   for (auto &reflector : _reflectors) {
     result &= utils::WakeUp(_com_port, reflector);
     result &= utils::Reboot(_com_port, reflector);
+    result &= utils::ReadPositioningData(_com_port, reflector);
   }
 
   if (!result) { throw std::runtime_error("Reflectors initialization error."); }
@@ -261,7 +265,7 @@ void ReflectorsController::ProcessCommand(const GoCommand &command) {
                                                                std::abs(command.GetElevation() - reflector.actual_position_elevation_mm) * (kMaxSecu - 1.00);
     }
 
-    result &= utils::Go(_com_port, reflector, azimuth, elevation);
+    result &= utils::Move(_com_port, reflector, azimuth, elevation);
     result &= utils::ReadPositioningData(_com_port, reflector);
     if (!result) { throw std::runtime_error("Reflectors movement error."); }
   } while (azimuth != command.GetAzimuth() || (elevation != command.GetElevation()));
