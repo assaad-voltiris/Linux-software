@@ -188,8 +188,7 @@ bool Reboot(std::int32_t com_port, ReflectorState& reflector) {
   if (Send(com_port, kSendMsgFormat, reflector.com_id)) {
     std::string out;
     for (std::size_t attempts = 0; attempts < kMaxAttempts; ++attempts) {
-      Read(com_port, out);
-      if (out.find(kReadMsg) != std::string::npos) { return true; }
+      if (Read(com_port, out) && out.find(kReadMsg) != std::string::npos) { return true; }
     }
   }
   return false;
