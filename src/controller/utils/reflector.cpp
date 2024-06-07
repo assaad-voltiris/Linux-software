@@ -180,14 +180,16 @@ bool Reboot(std::int32_t com_port, ReflectorState& reflector) {
 
   // clang-format off
   static auto kSendMsgFormat = "R%d P\r\n";
-  static auto kReadMsg = "R";
+  static auto kReadMsg = "REBOOT";
   // clang-format on
 
   spdlog::debug("Sending reboot command for reflector: {} - {}", reflector.com_id, reflector.id);
 
   if (Send(com_port, kSendMsgFormat, reflector.com_id)) {
+    std::string out;
     for (std::size_t attempts = 0; attempts < kMaxAttempts; ++attempts) {
-      if (Read(com_port, kReadMsg)) { return true; }
+      Read(com_port, out);
+      if (out.find(kReadMsg) != std::string::npos) { return true; }
     }
   }
   return false;

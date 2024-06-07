@@ -84,6 +84,8 @@ void ReflectorsController::ExecuteCommands() {
 }
 
 void ReflectorsController::ProcessCommand(const LoadConfigurationCommand &command) {
+  spdlog::debug("ProcessCommand -- LoadConfigurationCommand");
+
   _reflectors = utils::LoadReflectorsFromConfigurationFile(command.GetFilePath());
 
   _update_listener->OnRDReflectorsSize(_reflectors.size());
@@ -91,6 +93,8 @@ void ReflectorsController::ProcessCommand(const LoadConfigurationCommand &comman
 }
 
 void ReflectorsController::ProcessCommand(const ValuesUpdateCommand &command) {
+  spdlog::debug("ProcessCommand -- ValuesUpdateCommand");
+
   for (const auto &update : command.GetUpdates()) {
     switch (update.value_id) {
       case ValuesUpdateCommand::ValueId::kAccelerationFactor: {
@@ -121,6 +125,8 @@ void ReflectorsController::ProcessCommand(const ValuesUpdateCommand &command) {
 }
 
 void ReflectorsController::ProcessCommand(const ConnectCommand &command) {
+  spdlog::debug("ProcessCommand -- ConnectCommand");
+
   if (_com_port != -1) { throw std::runtime_error("Port already connected."); }
 
   _com_port = utils::Connect(command.GetBusName());
@@ -152,12 +158,16 @@ void ReflectorsController::ProcessCommand(const ConnectCommand &command) {
 }
 
 void ReflectorsController::ProcessCommand(const DisconnectCommand &command) {
+  spdlog::debug("ProcessCommand -- DisconnectCommand");
+
   utils::Disconnect(_com_port);
   _com_port = -1;
   _update_listener->OnBusDisconnected();
 }
 
 void ReflectorsController::ProcessCommand(const InitializationCommand &command) {
+  spdlog::debug("ProcessCommand -- InitializationCommand");
+
   if (_com_port == -1) { throw std::runtime_error("Reflectors not connected."); }
 
   bool result = true;
@@ -172,6 +182,8 @@ void ReflectorsController::ProcessCommand(const InitializationCommand &command) 
 }
 
 void ReflectorsController::ProcessCommand(const ReadCommand &command) {
+  spdlog::debug("ProcessCommand -- ReadCommand");
+
   if (_com_port == -1) { throw std::runtime_error("Reflectors not connected."); }
 
   bool result = true;
@@ -181,6 +193,8 @@ void ReflectorsController::ProcessCommand(const ReadCommand &command) {
 }
 
 void ReflectorsController::ProcessCommand(const FlashCommand &command) {
+  spdlog::debug("ProcessCommand -- FlashCommand");
+
   if (_com_port == -1) { throw std::runtime_error("Reflectors not connected."); }
 
   bool result = true;
@@ -193,6 +207,8 @@ void ReflectorsController::ProcessCommand(const FlashCommand &command) {
 }
 
 void ReflectorsController::ProcessCommand(const RebootCommand &command) {
+  spdlog::debug("ProcessCommand -- RebootCommand");
+
   if (_com_port == -1) { throw std::runtime_error("Reflectors not connected."); }
 
   bool result = true;
@@ -205,6 +221,8 @@ void ReflectorsController::ProcessCommand(const RebootCommand &command) {
 }
 
 void ReflectorsController::ProcessCommand(const SetPositionCommand &command) {
+  spdlog::debug("ProcessCommand -- SetPositionCommand");
+
   if (_com_port == -1) { throw std::runtime_error("Reflectors not connected."); }
 
   bool result = true;
@@ -216,6 +234,8 @@ void ReflectorsController::ProcessCommand(const SetPositionCommand &command) {
   if (!result) { throw std::runtime_error("Reflectors initialization error."); }
 }
 void ReflectorsController::ProcessCommand(const GoCommand &command) {
+  spdlog::debug("ProcessCommand -- GoCommand");
+
   if (_com_port == -1) { throw std::runtime_error("Reflectors not connected."); }
 
   bool result = true;
