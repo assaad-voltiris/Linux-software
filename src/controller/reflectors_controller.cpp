@@ -241,12 +241,6 @@ void ReflectorsController::ProcessCommand(const GoCommand &command) {
                                                                std::abs(command.GetElevation() - reflector.actual_position_elevation_mm) * (kMaxSecu - 1.00);
     }
 
-    double direction_azimuth = azimuth - reflector.actual_position_azimuth_mm;
-    direction_azimuth = std::abs(direction_azimuth) > 0 ? direction_azimuth / std::abs(direction_azimuth) : 0;
-
-    double direction_elevation = elevation - reflector.actual_position_elevation_mm;
-    direction_elevation = std::abs(direction_elevation) > 0 ? direction_elevation / std::abs(direction_elevation) : 0;
-
     result &= utils::Go(_com_port, reflector, azimuth, elevation);
     result &= utils::ReadPositioningData(_com_port, reflector);
     if (!result) { throw std::runtime_error("Reflectors movement error."); }
