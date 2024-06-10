@@ -211,10 +211,13 @@ bool Move(std::int32_t com_port, ReflectorState& reflector, double azimuth, doub
   // clang-format off
   static auto kSendStep1MsgFormat = "R%d m\r\n";
   static auto kSendStep2MsgFormat = "R%d %d %+06.2f,%+06.2f\r\n";
+  static auto kReadMoveMsg = "Manual adjustment of both motors : +-aa.zz,+-ee.ll mm to specify displacement of azimuth and elevation motors, respectively";
   // clang-format on
 
   spdlog::debug("Sending go command for reflector: {} - {}", reflector.com_id, reflector.id);
   bool result = Send(com_port, kSendStep1MsgFormat, reflector.com_id);
+  std::string out;
+  if(Read(com_port, out) && out.find(kReadMoveMsg) == std::string::npos) { return false; }
   result &= Send(com_port, kSendStep2MsgFormat, reflector.com_id, reflector.line_num, azimuth, elevation);
 
   return result;
