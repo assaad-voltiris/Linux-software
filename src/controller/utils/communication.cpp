@@ -80,11 +80,10 @@ bool Read(std::int32_t port_handler, std::string& msg, const std::chrono::millis
 
   char receive_buffer[kBufferSize] = {'\0'};
   std::size_t receive_buffer_begin = 0;
-  std::size_t read_bytes = std::numeric_limits<std::size_t>::max();
-  while (read_bytes != 0 && !is_data_completed(receive_buffer, receive_buffer_begin) && !is_timeout_reached(start_time)) {
+  while (!is_data_completed(receive_buffer, receive_buffer_begin) && !is_timeout_reached(start_time)) {
     if (kBufferSize <= receive_buffer_begin) { throw std::runtime_error("Receive buffer overflow."); }
 
-    read_bytes = read(port_handler, &receive_buffer[receive_buffer_begin], kBufferSize - receive_buffer_begin);
+    read(port_handler, &receive_buffer[receive_buffer_begin], kBufferSize - receive_buffer_begin);
     receive_buffer_begin = clean_buffer(receive_buffer, kBufferSize);
   }
 

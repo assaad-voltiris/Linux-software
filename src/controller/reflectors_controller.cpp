@@ -248,6 +248,10 @@ void ReflectorsController::ProcessCommand(const GoCommand &command) {
 
   double azimuth = command.GetAzimuth();
   double elevation = command.GetElevation();
+  double prev_azimuth = command.GetAzimuth();
+  double prev_elevation = command.GetElevation();
+
+  bool should_continue = false;
 
   do {
     result &= utils::ReadPositioningData(_com_port, reflector);
@@ -255,6 +259,8 @@ void ReflectorsController::ProcessCommand(const GoCommand &command) {
 
     azimuth = command.GetAzimuth();
     elevation = command.GetElevation();
+    prev_azimuth = reflector.actual_position_azimuth_mm;
+    prev_elevation = reflector.actual_position_elevation_mm;
 
     if (std::abs(reflector.actual_position_azimuth_mm - command.GetAzimuth()) > kMaxSecu) {
       azimuth = reflector.actual_position_azimuth_mm + (command.GetAzimuth() - reflector.actual_position_azimuth_mm) /
@@ -266,9 +272,14 @@ void ReflectorsController::ProcessCommand(const GoCommand &command) {
     }
 
     result &= utils::Move(_com_port, reflector, azimuth, elevation);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     result &= utils::ReadPositioningData(_com_port, reflector);
+
     if (!result) { throw std::runtime_error("Reflectors movement error."); }
-  } while (azimuth != command.GetAzimuth() || (elevation != command.GetElevation()));
+
+    should_continue = azimuth != command.GetAzimuth() || elevation != command.GetElevation();
+    should_continue &= prev_azimuth != reflector.actual_position_azimuth_mm || prev_elevation != reflector.actual_position_elevation_mm;
+  } while (should_continue);
 }
 
 void ReflectorsController::ControllerThreadExecute() {
