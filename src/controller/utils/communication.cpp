@@ -91,6 +91,8 @@ bool Read(std::int32_t port_handler, std::string& msg, const std::chrono::millis
   msg = receive_buffer;
   spdlog::debug("Received data: {}", msg);
 
+  std::this_thread::sleep_for(std::chrono::milliseconds(200));
+
   return is_data_completed(receive_buffer, receive_buffer_begin);
 }
 
