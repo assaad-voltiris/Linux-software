@@ -23,6 +23,10 @@ public:
   // RENDERING LOGIC
 
   // DATA
+  void OnCycleFrequency(double value);
+  void OnStartingHraEnabled(bool value);
+  void OnStartingHra(double value);
+  void OnAccelerationFactor(double value);
 
 private:
   // RENDERING LOGIC

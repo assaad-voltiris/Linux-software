@@ -7,6 +7,17 @@
 
 #include <spdlog/spdlog.h>
 
+#include <controller/updates/ast_update.hpp>
+#include <controller/updates/bus_connected_update.hpp>
+#include <controller/updates/bus_disconnected_update.hpp>
+#include <controller/updates/bus_list_update.hpp>
+#include <controller/updates/cp_update.hpp>
+#include <controller/updates/current_configuration_update.hpp>
+#include <controller/updates/error_update.hpp>
+#include <controller/updates/reflector_state_update.hpp>
+#include <controller/updates/reflectors_size_update.hpp>
+#include <controller/updates/status_update.hpp>
+
 #include <controller/commands/connect_command.hpp>
 #include <controller/commands/disconnect_command.hpp>
 #include <controller/commands/flash_command.hpp>
@@ -36,10 +47,6 @@ const double kHRAReturnDefault[kNightSize] = {90.0, 82.5, 75,    67.5,  60.0,  5
 double kAzimuthMax = 80;
 double kElevationMin = 16.00;
 
-constexpr auto *kRS485Device = "/dev/ttyS5";
-#define BAUDRATE B9600   // Baudrate (can be changed as needed)
-#define BUFFER_SIZE 255  // Buffer size for sending and receiving data
-
 }  // namespace
 
 ReflectorsController::ReflectorsController() {}
@@ -47,7 +54,7 @@ ReflectorsController::ReflectorsController() {}
 void ReflectorsController::Start() {
   _is_working = true;
 
-  _update_listener->OnBusListUpdate(utils::GetAvailablePorts());
+  _update_listener->OnUpdate(std::make_unique<BusListUpdate>(utils::GetAvailablePorts()));
 
   _controller_thread = std::thread(&ReflectorsController::ControllerThreadExecute, this);
 }
@@ -55,7 +62,7 @@ void ReflectorsController::Start() {
 void ReflectorsController::Stop() {
   if (_com_port != -1) {
     utils::Disconnect(_com_port);
-    _update_listener->OnBusDisconnected();
+    _update_listener->OnUpdate(std::make_unique<BusDisconnectedUpdate>());
   }
 
   _is_working = false;
@@ -63,6 +70,7 @@ void ReflectorsController::Stop() {
 }
 
 void ReflectorsController::OnCommand(std::unique_ptr<ReflectorsControllerCommand> command) {
+  spdlog::info("New command received.");
   std::lock_guard<std::mutex> lock(_commands_queue_mutex);
   _commands_queue.push(std::move(command));
 }
@@ -84,16 +92,16 @@ void ReflectorsController::ExecuteCommands() {
 }
 
 void ReflectorsController::ProcessCommand(const LoadConfigurationCommand &command) {
-  spdlog::debug("ProcessCommand -- LoadConfigurationCommand");
+  spdlog::debug("LoadConfigurationCommand received.");
 
   _reflectors = utils::LoadReflectorsFromConfigurationFile(command.GetFilePath());
 
-  _update_listener->OnRDReflectorsSize(_reflectors.size());
-  for (std::size_t i = 0; i < _reflectors.size(); ++i) { _update_listener->OnRDReflectorState(i, _reflectors[i]); }
+  _update_listener->OnUpdate(std::make_unique<ReflectorsSizeUpdate>(_reflectors.size()));
+  for (std::size_t i = 0; i < _reflectors.size(); ++i) { _update_listener->OnUpdate(std::make_unique<ReflectorStateUpdate>(i, _reflectors[i])); }
 }
 
 void ReflectorsController::ProcessCommand(const ValuesUpdateCommand &command) {
-  spdlog::debug("ProcessCommand -- ValuesUpdateCommand");
+  spdlog::debug("ValuesUpdateCommand received.");
 
   for (const auto &update : command.GetUpdates()) {
     switch (update.value_id) {
@@ -125,48 +133,25 @@ void ReflectorsController::ProcessCommand(const ValuesUpdateCommand &command) {
 }
 
 void ReflectorsController::ProcessCommand(const ConnectCommand &command) {
-  spdlog::debug("ProcessCommand -- ConnectCommand");
+  spdlog::debug("ConnectCommand received.");
 
   if (_com_port != -1) { throw std::runtime_error("Port already connected."); }
 
   _com_port = utils::Connect(command.GetBusName());
 
-  _update_listener->OnBusConnected();
-
-  //  if (command.GetIsConnect()) {
-  //    if (_com_port != -1) {
-  //      _data_observer->OnError("Port already connected");
-  //      return;
-  //    }
-  //
-  //
-  //
-  //    /// TODO remove Test send
-  //    // Get user input for message to send
-  //    char send_buffer[] = "FromVoltiris\n";
-  //    // send_buffer[strcspn(send_buffer, "\n")] = '\0';
-  //
-  //    // Write data
-  //    if (write(_com_port, send_buffer, strlen(send_buffer)) == -1) {
-  //      _data_observer->OnError("Write error");
-  //      close(_com_port);
-  //    }
-  //  } else {
-  //    close(_com_port);
-  //    _com_port = -1;
-  //  }
+  _update_listener->OnUpdate(std::make_unique<BusConnectedUpdate>());
 }
 
 void ReflectorsController::ProcessCommand(const DisconnectCommand &command) {
-  spdlog::debug("ProcessCommand -- DisconnectCommand");
+  spdlog::debug("DisconnectCommand received.");
 
   utils::Disconnect(_com_port);
   _com_port = -1;
-  _update_listener->OnBusDisconnected();
+  _update_listener->OnUpdate(std::make_unique<BusDisconnectedUpdate>());
 }
 
 void ReflectorsController::ProcessCommand(const InitializationCommand &command) {
-  spdlog::debug("ProcessCommand -- InitializationCommand");
+  spdlog::debug("InitializationCommand received.");
 
   if (_com_port == -1) { throw std::runtime_error("Reflectors not connected."); }
 
@@ -182,7 +167,7 @@ void ReflectorsController::ProcessCommand(const InitializationCommand &command) 
 }
 
 void ReflectorsController::ProcessCommand(const ReadCommand &command) {
-  spdlog::debug("ProcessCommand -- ReadCommand");
+  spdlog::debug("ReadCommand received.");
 
   if (_com_port == -1) { throw std::runtime_error("Reflectors not connected."); }
 
@@ -196,7 +181,7 @@ void ReflectorsController::ProcessCommand(const ReadCommand &command) {
 }
 
 void ReflectorsController::ProcessCommand(const FlashCommand &command) {
-  spdlog::debug("ProcessCommand -- FlashCommand");
+  spdlog::debug("FlashCommand received.");
 
   if (_com_port == -1) { throw std::runtime_error("Reflectors not connected."); }
 
@@ -210,7 +195,7 @@ void ReflectorsController::ProcessCommand(const FlashCommand &command) {
 }
 
 void ReflectorsController::ProcessCommand(const RebootCommand &command) {
-  spdlog::debug("ProcessCommand -- RebootCommand");
+  spdlog::debug("RebootCommand received.");
 
   if (_com_port == -1) { throw std::runtime_error("Reflectors not connected."); }
 
@@ -225,7 +210,7 @@ void ReflectorsController::ProcessCommand(const RebootCommand &command) {
 }
 
 void ReflectorsController::ProcessCommand(const SetPositionCommand &command) {
-  spdlog::debug("ProcessCommand -- SetPositionCommand");
+  spdlog::debug("SetPositionCommand received.");
 
   if (_com_port == -1) { throw std::runtime_error("Reflectors not connected."); }
 
@@ -237,8 +222,9 @@ void ReflectorsController::ProcessCommand(const SetPositionCommand &command) {
 
   if (!result) { throw std::runtime_error("Reflectors initialization error."); }
 }
+
 void ReflectorsController::ProcessCommand(const GoCommand &command) {
-  spdlog::debug("ProcessCommand -- GoCommand");
+  spdlog::debug("GoCommand received.");
 
   if (_com_port == -1) { throw std::runtime_error("Reflectors not connected."); }
 
@@ -282,6 +268,20 @@ void ReflectorsController::ProcessCommand(const GoCommand &command) {
   } while (should_continue);
 }
 
+void ReflectorsController::ProcessCommand(const RequestConfigurationCommand &command) {
+  spdlog::debug("RequestConfigurationCommand received.");
+  _update_listener->OnUpdate(std::make_unique<BusListUpdate>(utils::GetAvailablePorts()));
+
+  if (_com_port == -1) {
+    _update_listener->OnUpdate(std::make_unique<BusDisconnectedUpdate>());
+  } else {
+    _update_listener->OnUpdate(std::make_unique<BusConnectedUpdate>());
+  }
+
+  _update_listener->OnUpdate(std::make_unique<ReflectorsSizeUpdate>(_reflectors.size()));
+  for (std::size_t i = 0; i < _reflectors.size(); ++i) { _update_listener->OnUpdate(std::make_unique<ReflectorStateUpdate>(i, _reflectors[i])); }
+}
+
 void ReflectorsController::ControllerThreadExecute() {
   const auto max_frame_time = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::seconds(1)) / 5;
 
@@ -294,10 +294,13 @@ void ReflectorsController::ControllerThreadExecute() {
 
   auto start = std::chrono::high_resolution_clock::now();
 
+  std::unique_ptr<ASTUpdate> prev_ast_update;
+
   while (_is_working) {
+    auto iteration_start = std::chrono::high_resolution_clock::now();
     try {
       ExecuteCommands();
-    } catch (const std::runtime_error &ex) { _update_listener->OnError(std::string("Command execution error: ") + ex.what()); }
+    } catch (const std::runtime_error &ex) { _update_listener->OnUpdate(std::make_unique<ErrorUpdate>(std::string("Command execution error: ") + ex.what())); }
 
     time_t time_t = utils::GetCurrentTimePoint();
     tm utc_time = utils::GetUTCTime(time_t);
@@ -334,18 +337,16 @@ void ReflectorsController::ControllerThreadExecute() {
     auto elapsed_time_double = std::chrono::duration_cast<std::chrono::duration<double>>(elapsed_time).count();
     hra = std::fmod(_hra_input + _acceleration_factor * elapsed_time_double / 240 + 180, 360) - 180;
 
-    double hra_rad = hra / 360.00 * 2.00 * M_PI;
-    double lat_rad = _latitude / 360.00 * 2.00 * M_PI;
+    double hra_rad = hra / 360.00 * 2.00 * PI;
+    double lat_rad = _latitude / 360.00 * 2.00 * PI;
     double alpha = asin(sin(delta_rad) * sin(lat_rad) + cos(delta_rad) * cos(lat_rad) * cos(hra_rad));
-    double alpha_deg = alpha / 2.00 / M_PI * 360;
+    double alpha_deg = alpha / 2.00 / PI * 360;
     double azimuth = acos((sin(delta_rad) * cos(lat_rad) - cos(delta_rad) * sin(lat_rad) * cos(hra_rad)) / cos(alpha));  // AZ RAD
-    double azimuth_deg = azimuth / 2.00 / M_PI * 360;
+    double azimuth_deg = azimuth / 2.00 / PI * 360;
     if (hra > 0) { azimuth_deg = 360.00 - azimuth_deg; }
 
-    _update_listener->OnASTLocalTime(local_time.tm_hour, local_time.tm_min);
-    _update_listener->OnASTSystemTime((int)(std::floor(solar_time_dec)), (int)(std::floor(std::fmod(solar_time_dec, 1) * 60.00)));
-    _update_listener->OnASTSunAzimuth(azimuth_deg);
-    _update_listener->OnASTSunElevation(alpha_deg);
+    double temp_azimuth_deg = azimuth_deg;
+    double temp_alpha_deg = alpha_deg;
 
     // IF TRACKING IS ON
 
@@ -353,24 +354,32 @@ void ReflectorsController::ControllerThreadExecute() {
     _hrar_old = hrar;
 
     // AZ and EL from the reflector
-    double hrar_rad = hrar / 360.00 * 2.00 * M_PI;
+    double hrar_rad = hrar / 360.00 * 2.00 * PI;
     alpha = asin(sin(delta_rad) * sin(lat_rad) + cos(delta_rad) * cos(lat_rad) * cos(hrar_rad));
-    alpha_deg = alpha / 2.00 / M_PI * 360;
+    alpha_deg = alpha / 2.00 / PI * 360;
     azimuth = acos((sin(delta_rad) * cos(lat_rad) - cos(delta_rad) * sin(lat_rad) * cos(hrar_rad)) / cos(alpha));
-    azimuth_deg = azimuth / 2.00 / M_PI * 360;
+    azimuth_deg = azimuth / 2.00 / PI * 360;
     if (hrar > 0) { azimuth_deg = 360.00 - azimuth_deg; }
 
     alpha_deg = alpha_deg < kElevationMin ? kElevationMin : alpha_deg;
     azimuth_deg = azimuth_deg > (180 + kAzimuthMax) ? (180 + kAzimuthMax) : azimuth_deg;
     azimuth_deg = azimuth_deg < (180 - kAzimuthMax) ? (180 - kAzimuthMax) : azimuth_deg;
 
-    _update_listener->OnASTSunRefAzimuth(azimuth_deg);
-    _update_listener->OnASTSunRefElevation(alpha_deg);
-
-    _update_listener->OnASTHra(hra);
-    _update_listener->OnASTHrar(hrar);
+    if (!prev_ast_update) {
+      prev_ast_update = std::make_unique<ASTUpdate>(_latitude, _longitude, local_time.tm_hour, local_time.tm_min, (int)(std::floor(solar_time_dec)),
+                                                    (int)(std::floor(std::fmod(solar_time_dec, 1) * 60.00)), temp_azimuth_deg, temp_alpha_deg, azimuth_deg,
+                                                    alpha_deg, hra, hrar);
+    }
+    auto new_ast_update = std::make_unique<ASTUpdate>(_latitude, _longitude, local_time.tm_hour, local_time.tm_min, (int)(std::floor(solar_time_dec)),
+                                                      (int)(std::floor(std::fmod(solar_time_dec, 1) * 60.00)), temp_azimuth_deg, temp_alpha_deg, azimuth_deg,
+                                                      alpha_deg, hra, hrar);
+    if (*prev_ast_update != *new_ast_update) {
+      prev_ast_update = std::move(new_ast_update);
+      _update_listener->OnUpdate(std::make_unique<ASTUpdate>(*prev_ast_update));
+    }
 
     for (std::size_t i = 0; i < _reflectors.size(); ++i) {
+      auto reflector_copy = _reflectors[i];
       auto &reflector = _reflectors[i];
 
       if (reflector.actual_status_azimuth != 0 || reflector.actual_status_elevation != 0) { /* TODO */
@@ -388,14 +397,14 @@ void ReflectorsController::ControllerThreadExecute() {
       reflector.theoretical_position_azimuth_deg = utils::ConvertAzimuth_Mm2Deg(reflector, reflector.theoretical_position_azimuth_mm);
       reflector.theoretical_position_elevation_deg = utils::ConvertElevation_Mm2DegTh(reflector, reflector.theoretical_position_elevation_mm);
 
-      _update_listener->OnRDReflectorState(i, reflector);
+      if (reflector_copy != reflector) { _update_listener->OnUpdate(std::make_unique<ReflectorStateUpdate>(i, reflector)); }
     }
 
-    auto frame_time = std::chrono::high_resolution_clock::now() - start;
+    auto frame_time = std::chrono::high_resolution_clock::now() - iteration_start;
     auto sleep_time = max_frame_time - frame_time;
 
     if (sleep_time.count() > 0) {
-      // spdlog::info("Sleep controller for {} ms.", sleep_time.count());
+      // spdlog::info("Sleep controller for {} ns.", sleep_time.count());
       std::this_thread::sleep_for(sleep_time);
     }
   }

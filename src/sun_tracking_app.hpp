@@ -8,20 +8,15 @@ namespace voltiris {
 
 class SunTrackingApp {
 public:
-  explicit SunTrackingApp();
-  ~SunTrackingApp() = default;
+  virtual ~SunTrackingApp() = default;
 
-  bool Init();
+  virtual bool Init() = 0;
 
-  void Run();
+  virtual void Run() = 0;
 
-  bool Cleanup();
+  virtual bool Cleanup() = 0;
 
-private:
-  controller::ReflectorsController _controller;
-
-  presentation::ui::Renderer _renderer;
-  presentation::ui::STWindow _window;
+  virtual bool RequestStop() { return false; }
 };
 
 }  // namespace voltiris

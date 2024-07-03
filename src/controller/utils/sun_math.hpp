@@ -4,6 +4,8 @@
 
 namespace voltiris::controller::utils {
 
+# define PI		3.14159265358979323846	/* pi */
+
 double GetB(std::int32_t month, std::int32_t day);
 
 double GetDeltaRad(double B);

@@ -57,7 +57,7 @@ bool Renderer::Cleanup() {
 }
 
 bool Renderer::Run(STWindow &st_window) {
-  const auto max_frame_time = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::seconds(1)) / 10;
+  const auto max_frame_time = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::seconds(1)) / 30;
 
   // Main rendering loop
   while (!glfwWindowShouldClose(_window)) {
@@ -65,6 +65,7 @@ bool Renderer::Run(STWindow &st_window) {
 
     FramePreprocessing();
 
+    st_window.ProcessUpdates();
     st_window.Render(_current_scale);
 
     FramePostprocessing();

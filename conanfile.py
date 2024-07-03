@@ -16,7 +16,9 @@ class VoltirisST(ConanFile):
     requires = [
         "imgui/1.90.5",
         "glfw/3.4",
-        "spdlog/1.14.0"
+        "spdlog/1.14.0",
+        "websocketpp/0.8.2",
+        "nlohmann_json/3.11.3"
     ]
 
     def layout(self):

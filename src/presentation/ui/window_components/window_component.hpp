@@ -14,6 +14,8 @@ public:
 
   void SendCommand(std::unique_ptr<controller::ReflectorsControllerCommand> command) { _commands_handler.OnCommand(std::move(command)); }
 
+  //virtual bool Init() = 0;
+
   virtual void Render(double scale) = 0;
 
 private:

@@ -6,13 +6,13 @@ namespace voltiris::controller::utils {
 
 double GetB(std::int32_t month, std::int32_t day) {
   double d = 30.44 * static_cast<double>(month) + static_cast<double>(day);
-  double B = 2.00 * M_PI * (d - 81.00) / 365.0;
+  double B = 2.00 * PI * (d - 81.00) / 365.0;
   return B;
 }
 
 double GetDeltaRad(double B) {
   double delta = 23.45 * std::sin(B);
-  double delta_rad = delta / 360.00 * 2.00 * M_PI;
+  double delta_rad = delta / 360.00 * 2.00 * PI;
   return delta_rad;
 }
 

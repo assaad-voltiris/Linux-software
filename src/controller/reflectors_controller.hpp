@@ -21,6 +21,7 @@ public:
   void Stop();
 
   inline void RegisterDataObserver(ControllerUpdateListener &update_listener) { _update_listener = &update_listener; }
+  void ProcessCommand(const RequestConfigurationCommand &command) override;
 
 private:
   void OnCommand(std::unique_ptr<ReflectorsControllerCommand> command) override;
@@ -34,7 +35,7 @@ private:
   void ProcessCommand(const FlashCommand &command) override;
   void ProcessCommand(const RebootCommand &command) override;
   void ProcessCommand(const SetPositionCommand &command) override;
-  void ProcessCommand(const GoCommand  &command) override;
+  void ProcessCommand(const GoCommand &command) override;
 
 private:
   void ControllerThreadExecute();
@@ -52,12 +53,11 @@ private:
 
   std::int32_t _com_port = -1;
 
-  double _cycles_frequency = 0;
+  double _cycles_frequency = 1;
   bool _hra_enabled = false;
-  double _hra = 0;
+  double _hra = 200;
   double _hra_input = 0;
-  bool _acceleration_factor_empty = true;
-  double _acceleration_factor = 0;
+  double _acceleration_factor = 1;
 
   double _latitude = 0;
   double _longitude = 0;

@@ -19,14 +19,30 @@ const char *kACSAccelerationFactor[] = {"1", "4", "5", "6", "7", "8", "10", "12"
 }  // namespace
 
 AcceleratedTrackingSettingsWindowComponent::AcceleratedTrackingSettingsWindowComponent(controller::ControllerCommandsHandler &commands_handler)
-    : WindowComponent(commands_handler) {
-  std::vector<controller::ValuesUpdateCommand::ValueUpdate> initial_updates;
-  initial_updates.emplace_back(controller::ValuesUpdateCommand::ValueId::kCycleFrequency, std::stod(kACSCycleFrequency[_cycle_frequency_current_index]));
-  initial_updates.emplace_back(controller::ValuesUpdateCommand::ValueId::kStartingHraEnabled, _starting_hra_enabled);
-  initial_updates.emplace_back(controller::ValuesUpdateCommand::ValueId::kStartingHra, _starting_hra);
-  initial_updates.emplace_back(controller::ValuesUpdateCommand::ValueId::kAccelerationFactor,
-                               std::stod(kACSAccelerationFactor[_acceleration_factor_current_index]));
-  SendCommand(std::make_unique<controller::ValuesUpdateCommand>(initial_updates));
+    : WindowComponent(commands_handler) {}
+
+void AcceleratedTrackingSettingsWindowComponent::OnCycleFrequency(double value) {
+  for (std::int32_t i = 0; i < IM_ARRAYSIZE(kACSCycleFrequency); i++) {
+    if (value == std::stod(kACSCycleFrequency[i])) {
+      _cycle_frequency_current_index = i;
+      break;
+    }
+  }
+  _cycle_frequency_current_index = IM_ARRAYSIZE(kACSCycleFrequency) - 1;
+}
+
+void AcceleratedTrackingSettingsWindowComponent::OnStartingHraEnabled(bool value) { _starting_hra_enabled = value; }
+
+void AcceleratedTrackingSettingsWindowComponent::OnStartingHra(double value) { _starting_hra = value; }
+
+void AcceleratedTrackingSettingsWindowComponent::OnAccelerationFactor(double value) {
+  for (std::int32_t i = 0; i < IM_ARRAYSIZE(kACSAccelerationFactor); i++) {
+    if (value == std::stod(kACSAccelerationFactor[i])) {
+      _acceleration_factor_current_index = i;
+      break;
+    }
+  }
+  _acceleration_factor_current_index = IM_ARRAYSIZE(kACSAccelerationFactor) - 1;
 }
 
 void AcceleratedTrackingSettingsWindowComponent::Render(double scale) {

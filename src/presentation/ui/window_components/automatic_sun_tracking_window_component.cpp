@@ -11,12 +11,7 @@
 namespace voltiris::presentation::ui {
 
 AutomaticSunTrackingWindowComponent::AutomaticSunTrackingWindowComponent(controller::ControllerCommandsHandler& commands_handler)
-    : WindowComponent(commands_handler) {
-  std::vector<controller::ValuesUpdateCommand::ValueUpdate> initial_updates;
-  initial_updates.emplace_back(controller::ValuesUpdateCommand::ValueId::kLatitude, _latitude);
-  initial_updates.emplace_back(controller::ValuesUpdateCommand::ValueId::kLongitude, _longitude);
-  SendCommand(std::make_unique<controller::ValuesUpdateCommand>(initial_updates));
-}
+    : WindowComponent(commands_handler) {}
 
 void AutomaticSunTrackingWindowComponent::Render(double scale) {
   // General group for AutomaticSunTracking
