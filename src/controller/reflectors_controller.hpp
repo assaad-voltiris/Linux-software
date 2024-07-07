@@ -64,6 +64,7 @@ private:
 
   // Internal variables
   std::vector<ReflectorState> _reflectors;
+  std::vector<ReflectorState> _reflectors_copy;
 
   std::chrono::steady_clock::time_point _start_time;
 

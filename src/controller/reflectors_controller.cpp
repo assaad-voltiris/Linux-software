@@ -99,6 +99,7 @@ void ReflectorsController::ProcessCommand(const LoadConfigurationCommand &comman
   } else {
     _reflectors = utils::LoadReflectorsFromConfigurationFile(command.GetFilePath());
   }
+  _reflectors_copy.resize(_reflectors.size());
 
   _update_listener->OnUpdate(std::make_unique<ReflectorsSizeUpdate>(_reflectors.size()));
   for (std::size_t i = 0; i < _reflectors.size(); ++i) { _update_listener->OnUpdate(std::make_unique<ReflectorStateUpdate>(i, _reflectors[i])); }
@@ -383,7 +384,7 @@ void ReflectorsController::ControllerThreadExecute() {
     }
 
     for (std::size_t i = 0; i < _reflectors.size(); ++i) {
-      auto reflector_copy = _reflectors[i];
+      auto &reflector_copy = _reflectors_copy[i];
       auto &reflector = _reflectors[i];
 
       if (reflector.actual_status_azimuth != 0 || reflector.actual_status_elevation != 0) { /* TODO */
@@ -401,7 +402,10 @@ void ReflectorsController::ControllerThreadExecute() {
       reflector.theoretical_position_azimuth_deg = utils::ConvertAzimuth_Mm2Deg(reflector, reflector.theoretical_position_azimuth_mm);
       reflector.theoretical_position_elevation_deg = utils::ConvertElevation_Mm2DegTh(reflector, reflector.theoretical_position_elevation_mm);
 
-      if (reflector_copy != reflector) { _update_listener->OnUpdate(std::make_unique<ReflectorStateUpdate>(i, reflector)); }
+      if (reflector_copy != reflector) {
+        reflector_copy = reflector;
+        _update_listener->OnUpdate(std::make_unique<ReflectorStateUpdate>(i, reflector));
+      }
     }
 
     auto frame_time = std::chrono::high_resolution_clock::now() - iteration_start;
