@@ -17,7 +17,8 @@ class ConfigurationWindowComponent : public WindowComponent {
 public:
   static const char* GetPopupName();
 
-  explicit ConfigurationWindowComponent(controller::ControllerCommandsHandler& commands_handler) : WindowComponent(commands_handler) {}
+  explicit ConfigurationWindowComponent(controller::ControllerCommandsHandler& commands_handler, bool send_file_content)
+      : WindowComponent(commands_handler), _send_configuration_file_content(send_file_content) {}
 
   void Render(double scale) override;
 
@@ -35,6 +36,8 @@ private:
 
   std::vector<std::string> _available_buss;
   std::size_t _available_buss_current_index = 0;
+
+  bool _send_configuration_file_content = false;
 
   // DATA
   bool _is_connected = false;

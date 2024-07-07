@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <vector>
+#include <atomic>
 
 #include <websocketpp/client.hpp>
 #include <websocketpp/config/asio_no_tls_client.hpp>
@@ -31,7 +32,7 @@ private:
 private:
   using client = websocketpp::client<websocketpp::config::asio_client>;
 
-  void OnMessage(client* s, websocketpp::connection_hdl hdl, client::message_ptr msg);
+  void OnMessage(client* c, websocketpp::connection_hdl hdl, client::message_ptr msg);
 
   std::thread _thread;
 

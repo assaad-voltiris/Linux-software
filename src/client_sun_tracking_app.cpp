@@ -4,7 +4,7 @@
 
 namespace voltiris {
 
-ClientSunTrackingApp::ClientSunTrackingApp(const std::string& address, std::int32_t port) : _client(address, port), _window(_client) {}
+ClientSunTrackingApp::ClientSunTrackingApp(const std::string& address, std::int32_t port) : _client(address, port), _window(_client, true) {}
 
 bool ClientSunTrackingApp::Init() {
   if (!_client.Init()) { return false; }

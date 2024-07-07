@@ -21,10 +21,10 @@
 
 namespace voltiris::presentation::ui {
 
-STWindow::STWindow(controller::ControllerCommandsHandler &commands_handler)
+STWindow::STWindow(controller::ControllerCommandsHandler &commands_handler, bool is_client_mode)
     : _commands_handler(commands_handler),
       _menu_window_component(_commands_handler),
-      _configuration_windows_component(_commands_handler),
+      _configuration_windows_component(_commands_handler, is_client_mode),
       _atc_window_component(_commands_handler),
       _mra_window_component(_commands_handler),
       _ast_window_component(_commands_handler),

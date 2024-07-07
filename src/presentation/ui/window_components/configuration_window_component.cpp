@@ -3,6 +3,9 @@
 //
 #include "configuration_window_component.hpp"
 
+#include <fstream>
+#include <sstream>
+
 #include <imgui.h>
 
 #include <portable-file-dialogs.h>
@@ -35,7 +38,19 @@ void ConfigurationWindowComponent::Render(double scale) {
     // Reflectors configuration
     if (ImGui::Button("Load reflectors configuration")) {
       auto file = pfd::open_file("Choose config file", pfd::path::home(), {"Text Files (.txt .text)", "*.txt *.text"}).result();
-      if (!file.empty()) { SendCommand(std::make_unique<controller::LoadConfigurationCommand>(file[0])); }
+      if (!file.empty()) {
+        if (_send_configuration_file_content) {
+          std::ifstream configuration_file(file[0]);
+          if (!configuration_file.is_open()) { return; }
+
+          std::stringstream buffer;
+          buffer << configuration_file.rdbuf();
+
+          SendCommand(std::make_unique<controller::LoadConfigurationCommand>("", buffer.str()));
+        } else {
+          SendCommand(std::make_unique<controller::LoadConfigurationCommand>(file[0]));
+        }
+      }
     }
 
     ImGui::SameLine();

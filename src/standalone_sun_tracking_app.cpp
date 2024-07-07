@@ -4,7 +4,7 @@
 
 namespace voltiris {
 
-StandaloneSunTrackingApp::StandaloneSunTrackingApp() : _window(_controller) {}
+StandaloneSunTrackingApp::StandaloneSunTrackingApp() : _window(_controller, false) {}
 
 bool StandaloneSunTrackingApp::Init() {
   _controller.RegisterDataObserver(_window);

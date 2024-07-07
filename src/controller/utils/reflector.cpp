@@ -1,6 +1,7 @@
 #include "reflector.hpp"
 
 #include <fstream>
+#include <sstream>
 
 #include <spdlog/spdlog.h>
 
@@ -77,6 +78,20 @@ std::vector<ReflectorState> LoadReflectorsFromConfigurationFile(const std::strin
   std::sort(result.begin(), result.end(), [](const ReflectorState& lhs, const ReflectorState& rhs) { return lhs.id < rhs.id; });
 
   return result;
+}
+
+std::vector<ReflectorState> LoadReflectorsFromConfiguration(const std::string& config_file_content) {
+  static const std::string temp_conf_file_name = "temp_configuration_file.txt";
+
+  std::ofstream configuration_file(temp_conf_file_name);
+  configuration_file << config_file_content;
+  configuration_file.close();
+
+  auto reflectors = LoadReflectorsFromConfigurationFile(temp_conf_file_name);
+
+  std::remove(temp_conf_file_name.c_str());
+
+  return reflectors;
 }
 
 bool WakeUp(std::int32_t com_port, ReflectorState& reflector) {
@@ -217,7 +232,7 @@ bool Move(std::int32_t com_port, ReflectorState& reflector, double azimuth, doub
   spdlog::debug("Sending go command for reflector: {} - {}", reflector.com_id, reflector.id);
   bool result = Send(com_port, kSendStep1MsgFormat, reflector.com_id);
   std::string out;
-  if(Read(com_port, out) && out.find(kReadMoveMsg) == std::string::npos) { return false; }
+  if (Read(com_port, out) && out.find(kReadMoveMsg) == std::string::npos) { return false; }
   result &= Send(com_port, kSendStep2MsgFormat, reflector.com_id, reflector.line_num, azimuth, elevation);
 
   return result;

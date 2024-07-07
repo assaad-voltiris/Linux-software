@@ -58,6 +58,13 @@ void Client::Stop() {
 
 void Client::OnCommand(std::unique_ptr<controller::ReflectorsControllerCommand> command) {
   if (_connection) {
+    const auto max_wait_time = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::seconds(1));
+
+    auto start = std::chrono::high_resolution_clock::now();
+    while (_connection->get_state() != websocketpp::session::state::open || (std::chrono::high_resolution_clock::now() - start) < max_wait_time) {
+      std::this_thread::sleep_for(std::chrono::nanoseconds(100));
+    }
+
     auto error = _connection->send(command->ToJson(), websocketpp::frame::opcode::TEXT);
     if (error) { spdlog::error("Client message sending error: {}", error.message()); }
   }

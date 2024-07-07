@@ -94,7 +94,11 @@ void ReflectorsController::ExecuteCommands() {
 void ReflectorsController::ProcessCommand(const LoadConfigurationCommand &command) {
   spdlog::debug("LoadConfigurationCommand received.");
 
-  _reflectors = utils::LoadReflectorsFromConfigurationFile(command.GetFilePath());
+  if (command.GetFilePath().empty()) {
+    _reflectors = utils::LoadReflectorsFromConfiguration(command.GetFileContent());
+  } else {
+    _reflectors = utils::LoadReflectorsFromConfigurationFile(command.GetFilePath());
+  }
 
   _update_listener->OnUpdate(std::make_unique<ReflectorsSizeUpdate>(_reflectors.size()));
   for (std::size_t i = 0; i < _reflectors.size(); ++i) { _update_listener->OnUpdate(std::make_unique<ReflectorStateUpdate>(i, _reflectors[i])); }
