@@ -105,11 +105,13 @@ void STWindow::ProcessUpdate(const controller::CPUpdate &update) { spdlog::debug
 void STWindow::ProcessUpdate(const controller::ReflectorStateUpdate &update) {
   spdlog::debug("ReflectorStateUpdate received.");
   _rd_window_component.OnReflectorState(update.GetReflectorIndex(), update.GetReflectorState());
+  _mra_window_component.OnReflectorState(update.GetReflectorIndex(), update.GetReflectorState());
 }
 
 void STWindow::ProcessUpdate(const controller::ReflectorsSizeUpdate &update) {
   spdlog::debug("ReflectorsSizeUpdate received.");
   _rd_window_component.OnReflectorsSize(update.GetSize());
+  _mra_window_component.OnReflectorsSize(update.GetSize());
 }
 
 void STWindow::ProcessUpdate(const controller::ErrorUpdate &update) {

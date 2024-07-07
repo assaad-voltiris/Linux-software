@@ -8,6 +8,7 @@
 #include <controller/commands/go_command.hpp>
 #include <controller/commands/initialization_command.hpp>
 #include <controller/commands/load_configuration_command.hpp>
+#include <controller/commands/move_command.hpp>
 #include <controller/commands/read_command.hpp>
 #include <controller/commands/reboot_command.hpp>
 #include <controller/commands/request_configuration_command.hpp>
@@ -41,6 +42,8 @@ std::unique_ptr<ReflectorsControllerCommand> ReflectorsControllerCommand::FromJs
     return std::make_unique<GoCommand>(json.template get<GoCommand>());
   } else if (json["id"] == "RequestConfigurationCommand") {
     return std::make_unique<RequestConfigurationCommand>(json.template get<RequestConfigurationCommand>());
+  } else if (json["id"] == "MoveCommand") {
+    return std::make_unique<MoveCommand>(json.template get<MoveCommand>());
   }
   return nullptr;
 }

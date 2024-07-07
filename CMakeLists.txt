@@ -15,6 +15,7 @@ add_executable(${PROJECT_NAME}
         src/controller/commands/go_command.cpp
         src/controller/commands/initialization_command.cpp
         src/controller/commands/load_configuration_command.cpp
+        src/controller/commands/move_command.cpp
         src/controller/commands/read_command.cpp
         src/controller/commands/reboot_command.cpp
         src/controller/commands/request_configuration_command.cpp

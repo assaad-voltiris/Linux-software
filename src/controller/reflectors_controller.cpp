@@ -24,10 +24,12 @@
 #include <controller/commands/go_command.hpp>
 #include <controller/commands/initialization_command.hpp>
 #include <controller/commands/load_configuration_command.hpp>
+#include <controller/commands/move_command.hpp>
 #include <controller/commands/read_command.hpp>
 #include <controller/commands/reboot_command.hpp>
 #include <controller/commands/set_position_command.hpp>
 #include <controller/commands/values_update_command.hpp>
+
 #include <controller/utils/communication.hpp>
 #include <controller/utils/converters.hpp>
 #include <controller/utils/reflector.hpp>
@@ -108,7 +110,10 @@ void ReflectorsController::ProcessCommand(const LoadConfigurationCommand &comman
   _reflectors_copy.resize(_reflectors.size());
 
   _update_listener->OnUpdate(std::make_unique<ReflectorsSizeUpdate>(_reflectors.size()));
-  for (std::size_t i = 0; i < _reflectors.size(); ++i) { _update_listener->OnUpdate(std::make_unique<ReflectorStateUpdate>(i, _reflectors[i])); }
+  for (std::size_t i = 0; i < _reflectors.size(); ++i) {
+    _reflectors_copy[i] = _reflectors[i];
+    _update_listener->OnUpdate(std::make_unique<ReflectorStateUpdate>(i, _reflectors[i]));
+  }
 }
 
 void ReflectorsController::ProcessCommand(const ValuesUpdateCommand &command) {
@@ -292,8 +297,13 @@ void ReflectorsController::ProcessCommand(const RequestConfigurationCommand &com
   }
 
   _update_listener->OnUpdate(std::make_unique<ReflectorsSizeUpdate>(_reflectors.size()));
-  for (std::size_t i = 0; i < _reflectors.size(); ++i) { _update_listener->OnUpdate(std::make_unique<ReflectorStateUpdate>(i, _reflectors[i])); }
+  for (std::size_t i = 0; i < _reflectors.size(); ++i) {
+    _reflectors_copy[i] = _reflectors[i];
+    _update_listener->OnUpdate(std::make_unique<ReflectorStateUpdate>(i, _reflectors[i]));
+  }
 }
+
+void ReflectorsController::ProcessCommand(const MoveCommand &command) { spdlog::debug("MoveCommand received."); }
 
 void ReflectorsController::ControllerThreadExecute() {
   const auto max_frame_time = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::seconds(1)) / 5;

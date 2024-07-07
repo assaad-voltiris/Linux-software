@@ -6,7 +6,7 @@
 
 #include <imgui.h>
 
-#include <controller/commands/values_update_command.hpp>
+#include <controller/commands/move_command.hpp>
 
 namespace voltiris::presentation::ui {
 
@@ -16,21 +16,52 @@ void ManualReflectorsAlignmentWindowComponent::Render(double scale) {  // Genera
   ImGui::BeginChild("Manual Reflectors Alignment", {}, ImGuiChildFlags_AutoResizeX | ImGuiChildFlags_AutoResizeY | ImGuiChildFlags_FrameStyle);
   ImGui::SeparatorText("Manual Reflectors Alignment");
 
-  if (ImGui::Button("UP")) {}
+  if (ImGui::Button("UP")) {
+    SendCommand(std::make_unique<controller::MoveCommand>(controller::MoveCommand::Direction::kUp, _step_size, GetReflectorsToMove(_reflectors_data)));
+  }
   ImGui::SameLine();
-  if (ImGui::Button("DOWN")) {}
+  if (ImGui::Button("DOWN")) {
+    SendCommand(std::make_unique<controller::MoveCommand>(controller::MoveCommand::Direction::kDown, _step_size, GetReflectorsToMove(_reflectors_data)));
+  }
   ImGui::SameLine();
-  if (ImGui::Button("EAST")) {}
+  if (ImGui::Button("EAST")) {
+    SendCommand(std::make_unique<controller::MoveCommand>(controller::MoveCommand::Direction::kEast, _step_size, GetReflectorsToMove(_reflectors_data)));
+  }
   ImGui::SameLine();
-  if (ImGui::Button("WEST")) {}
+  if (ImGui::Button("WEST")) {
+    SendCommand(std::make_unique<controller::MoveCommand>(controller::MoveCommand::Direction::kWest, _step_size, GetReflectorsToMove(_reflectors_data)));
+  }
+
+  ImGui::InputDouble("Step size (°)", &_step_size);
 
   ImGui::BeginGroup();
-  ImGui::InputDouble("Step size (°)", &_step_size);
-  ImGui::InputText("Reflectors To Move", _reflectors_to_move, IM_ARRAYSIZE(_reflectors_to_move));
+
+  std::size_t columns = _reflectors_data.size() / 10 + 1;
+  std::size_t reflector_index = 0;
+  for (std::size_t i = 0; i < columns; ++i) {
+    ImGui::BeginGroup();
+    for (std::size_t j = 0; j < 10 && reflector_index < _reflectors_data.size(); ++j) {
+      std::string name = "REF-" + std::to_string(_reflectors_data[reflector_index].id);
+      ImGui::Checkbox(name.c_str(), &(_reflectors_data[reflector_index].to_move));
+      ++reflector_index;
+    }
+    ImGui::EndGroup();
+
+    if (columns != _reflectors_data.size() / 10) { ImGui::SameLine(); }
+  }
+
   ImGui::EndGroup();
 
   ImGui::EndChild();
   ImGui::EndGroup();
+}
+
+std::vector<std::size_t> ManualReflectorsAlignmentWindowComponent::GetReflectorsToMove(const std::vector<ReflectorData>& reflectors_data) {
+  std::vector<std::size_t> result;
+  for (std::size_t i = 0; i < reflectors_data.size(); ++i) {
+    if (reflectors_data[i].to_move) { result.push_back(i); }
+  }
+  return result;
 }
 
 }  // namespace voltiris::presentation::ui

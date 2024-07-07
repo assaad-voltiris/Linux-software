@@ -36,6 +36,7 @@ private:
   void ProcessCommand(const RebootCommand &command) override;
   void ProcessCommand(const SetPositionCommand &command) override;
   void ProcessCommand(const GoCommand &command) override;
+  void ProcessCommand(const MoveCommand &command) override;
 
 private:
   void ControllerThreadExecute();

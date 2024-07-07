@@ -21,7 +21,7 @@ void to_json(nlohmann::json& j, const ValuesUpdateCommand& command) {
 void from_json(const nlohmann::json& j, ValuesUpdateCommand& command) {
   std::vector<ValuesUpdateCommand::ValueUpdate> updates;
   for (auto& json_update : j["updates"]) {
-    updates.emplace_back(static_cast<ValuesUpdateCommand::ValueId>(json_update["value_id"]), json_update["value"].get<std::size_t>());
+    updates.emplace_back(static_cast<ValuesUpdateCommand::ValueId>(json_update["value_id"].get<std::uint32_t>()), json_update["value"].get<std::size_t>());
   }
   command = ValuesUpdateCommand(updates);
 }
