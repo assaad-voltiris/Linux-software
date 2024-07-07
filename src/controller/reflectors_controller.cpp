@@ -275,6 +275,8 @@ void ReflectorsController::ProcessCommand(const GoCommand &command) {
 
 void ReflectorsController::ProcessCommand(const RequestConfigurationCommand &command) {
   spdlog::debug("RequestConfigurationCommand received.");
+  _update_listener->OnUpdate(std::make_unique<CurrentConfigurationUpdate>(_latitude, _longitude, _cycles_frequency, _hra_enabled, _hra, _acceleration_factor));
+
   _update_listener->OnUpdate(std::make_unique<BusListUpdate>(utils::GetAvailablePorts()));
 
   if (_com_port == -1) {
