@@ -9,7 +9,7 @@ std::string SetPositionCommand::ToJson() {
 
 void to_json(nlohmann::json& j, const SetPositionCommand& command) {
   j = nlohmann::json{
-      {"id", "GoCommand"}, {"reflector_index", command.GetReflectorIndex()}, {"azimuth", command.GetAzimuth()}, {"elevation", command.GetElevation()}};
+      {"id", "SetPositionCommand"}, {"reflector_index", command.GetReflectorIndex()}, {"azimuth", command.GetAzimuth()}, {"elevation", command.GetElevation()}};
 }
 
 void from_json(const nlohmann::json& j, SetPositionCommand& command) {

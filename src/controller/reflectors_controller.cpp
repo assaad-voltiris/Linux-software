@@ -38,6 +38,9 @@ namespace voltiris::controller {
 
 namespace {
 
+const double kLatitudeDefaultValue = 46.52;
+const double kLongitudeDefaultValue = 6.63;
+
 static double kMaxSecu = 39.0;
 
 const int kNightSize = 24;
@@ -49,7 +52,10 @@ double kElevationMin = 16.00;
 
 }  // namespace
 
-ReflectorsController::ReflectorsController() {}
+ReflectorsController::ReflectorsController() {
+  _latitude = kLatitudeDefaultValue;
+  _longitude = kLongitudeDefaultValue;
+}
 
 void ReflectorsController::Start() {
   _is_working = true;
