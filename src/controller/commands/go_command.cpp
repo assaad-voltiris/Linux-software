@@ -8,12 +8,11 @@ std::string GoCommand::ToJson() {
 }
 
 void to_json(nlohmann::json& j, const GoCommand& command) {
-  j = nlohmann::json{
-      {"id", "GoCommand"}, {"reflector_index", command.GetReflectorIndex()}, {"azimuth", command.GetAzimuth()}, {"elevation", command.GetElevation()}};
+  j = nlohmann::json{{"id", "Go"}, {"r", command.GetReflectorIndex()}, {"a", command.GetAzimuth()}, {"e", command.GetElevation()}};
 }
 
 void from_json(const nlohmann::json& j, GoCommand& command) {
-  command = GoCommand(j.at("reflector_index").get<std::size_t>(), j.at("azimuth").get<double>(), j.at("elevation").get<double>());
+  command = GoCommand(j.at("r").get<std::size_t>(), j.at("a").get<double>(), j.at("e").get<double>());
 }
 
 }  // namespace voltiris::controller

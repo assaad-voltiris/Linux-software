@@ -9,26 +9,25 @@ std::string ASTUpdate::ToJson() {
 }
 
 void to_json(nlohmann::json& j, const ASTUpdate& update) {
-  j = nlohmann::json{{"id", "ASTUpdate"},
-                     {"latitude", update.GetLatitude()},
-                     {"longitude", update.GetLongitude()},
-                     {"local_hours", update.GetLocalHours()},
-                     {"local_minutes", update.GetLocalMinutes()},
-                     {"system_hours", update.GetSystemHours()},
-                     {"system_minutes", update.GetSystemMinutes()},
-                     {"sun_azimuth", update.GetSunAzimuth()},
-                     {"sun_elevation", update.GetSunElevation()},
-                     {"sun_ref_azimuth", update.GetSunRefAzimuth()},
-                     {"sun_ref_elevation", update.GetSunRefElevation()},
+  j = nlohmann::json{{"id", "AST"},
+                     {"la", update.GetLatitude()},
+                     {"lo", update.GetLongitude()},
+                     {"lh", update.GetLocalHours()},
+                     {"lm", update.GetLocalMinutes()},
+                     {"sh", update.GetSystemHours()},
+                     {"sm", update.GetSystemMinutes()},
+                     {"a", update.GetSunAzimuth()},
+                     {"e", update.GetSunElevation()},
+                     {"ra", update.GetSunRefAzimuth()},
+                     {"re", update.GetSunRefElevation()},
                      {"hra", update.GetHra()},
                      {"hrar", update.GetHrar()}};
 }
 
 void from_json(const nlohmann::json& j, ASTUpdate& update) {
-  update = ASTUpdate(j.at("latitude").get<double>(), j.at("longitude").get<double>(), j.at("local_hours").get<std::int32_t>(),
-                     j.at("local_minutes").get<std::int32_t>(), j.at("system_hours").get<std::int32_t>(), j.at("system_minutes").get<std::int32_t>(),
-                     j.at("sun_azimuth").get<double>(), j.at("sun_elevation").get<double>(), j.at("sun_ref_azimuth").get<double>(),
-                     j.at("sun_ref_elevation").get<double>(), j.at("hrar").get<double>(), j.at("hra").get<double>());
+  update = ASTUpdate(j.at("la").get<double>(), j.at("lo").get<double>(), j.at("lh").get<std::int32_t>(), j.at("lm").get<std::int32_t>(),
+                     j.at("sh").get<std::int32_t>(), j.at("sm").get<std::int32_t>(), j.at("a").get<double>(), j.at("e").get<double>(), j.at("ra").get<double>(),
+                     j.at("re").get<double>(), j.at("hra").get<double>(), j.at("hrar").get<double>());
 }
 
 }  // namespace voltiris::controller

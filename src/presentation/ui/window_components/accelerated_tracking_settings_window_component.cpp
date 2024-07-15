@@ -112,13 +112,15 @@ void AcceleratedTrackingSettingsWindowComponent::Render(double scale) {
   // Bottom line
   ImGui::BeginGroup();
   if (ImGui::Checkbox("Enable Starting Hra", &_starting_hra_enabled)) {
-    SendCommand(std::make_unique<controller::ValuesUpdateCommand>(
-        std::vector<controller::ValuesUpdateCommand::ValueUpdate>{{controller::ValuesUpdateCommand::ValueId::kStartingHraEnabled, _starting_hra_enabled}}));
+    controller::ValuesUpdateCommand cmd;
+    cmd.SetStartingHra(_starting_hra_enabled ? _starting_hra : -1);
+    SendCommand(std::make_unique<controller::ValuesUpdateCommand>(cmd));
   }
   ImGui::BeginDisabled(!_starting_hra_enabled);
   if (ImGui::InputDouble("Starting Hra", &_starting_hra)) {
-    SendCommand(std::make_unique<controller::ValuesUpdateCommand>(
-        std::vector<controller::ValuesUpdateCommand::ValueUpdate>{{controller::ValuesUpdateCommand::ValueId::kStartingHra, _starting_hra}}));
+    controller::ValuesUpdateCommand cmd;
+    cmd.SetStartingHra(_starting_hra_enabled ? _starting_hra : -1);
+    SendCommand(std::make_unique<controller::ValuesUpdateCommand>(cmd));
   }
   ImGui::EndDisabled();
   if (ImGui::BeginCombo("Acceleration Factor", kACSAccelerationFactor[_acceleration_factor_current_index], ImGuiComboFlags_WidthFitPreview)) {

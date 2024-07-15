@@ -7,7 +7,7 @@ std::string InitializationCommand::ToJson() {
   return j.dump();
 }
 
-void to_json(nlohmann::json& j, const InitializationCommand& command) { j = nlohmann::json{{"id", "InitializationCommand"}}; }
+void to_json(nlohmann::json& j, const InitializationCommand& command) { j = nlohmann::json{{"id", "Initialization"}}; }
 
 void from_json(const nlohmann::json& j, InitializationCommand& command) { command = InitializationCommand(); }
 

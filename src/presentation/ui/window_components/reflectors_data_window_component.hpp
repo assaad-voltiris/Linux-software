@@ -21,6 +21,8 @@ public:
 
   void Render(double scale) override;
 
+  void OnControllerStatusUpdate(controller::ControllerStatus status) override { _controller_status = status; }
+
   // RENDERING LOGIC
 
   // DATA
@@ -34,6 +36,8 @@ public:
   void OnReflectorState(std::size_t reflector_index, const controller::ReflectorState& new_state) { _reflectors_data[reflector_index] = new_state; }
 
 private:
+  controller::ControllerStatus _controller_status = controller::ControllerStatus::kIdle;
+
   // RENDERING LOGIC
   void RenderRealRow(const controller::ReflectorState& reflector_data, std::size_t i);
   void RenderDummyRow(std::size_t id);

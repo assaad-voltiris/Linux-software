@@ -7,7 +7,7 @@ std::string RequestConfigurationCommand::ToJson() {
   return j.dump();
 }
 
-void to_json(nlohmann::json& j, const RequestConfigurationCommand& command) { j = nlohmann::json{{"id", "RequestConfigurationCommand"}}; }
+void to_json(nlohmann::json& j, const RequestConfigurationCommand& command) { j = nlohmann::json{{"id", "RequestConfiguration"}}; }
 
 void from_json(const nlohmann::json& j, RequestConfigurationCommand& command) { command = RequestConfigurationCommand(); }
 

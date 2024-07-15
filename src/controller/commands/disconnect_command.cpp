@@ -7,7 +7,7 @@ std::string DisconnectCommand::ToJson() {
   return j.dump();
 }
 
-void to_json(nlohmann::json& j, const DisconnectCommand& command) { j = nlohmann::json{{"id", "DisconnectCommand"}}; }
+void to_json(nlohmann::json& j, const DisconnectCommand& command) { j = nlohmann::json{{"id", "Disconnect"}}; }
 
 void from_json(const nlohmann::json& j, DisconnectCommand& command) { command = DisconnectCommand(); }
 

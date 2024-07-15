@@ -1,5 +1,6 @@
 #pragma once
 
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -12,35 +13,22 @@ namespace voltiris::controller {
 
 class ValuesUpdateCommand : public ReflectorsControllerCommand {
 public:
-  enum class ValueId { kAccelerationFactor, kStartingHraEnabled, kStartingHra, kCycleFrequency, kLatitude, kLongitude };
-
-  struct ValueUpdate {
-    ValueUpdate(ValueId in_value_id, double in_value) : value_id(in_value_id), value_double(in_value) {}
-
-    ValueUpdate(ValueId in_value_id, std::size_t in_value) : value_id(in_value_id), value_uint(in_value) {}
-
-    ValueUpdate(ValueId in_value_id, bool in_value) : value_id(in_value_id), value_bool(in_value) {}
-
-    ValueId value_id;
-    union {
-      double value_double;
-      std::size_t value_uint;
-      bool value_bool;
-    };
-  };
-
   inline explicit ValuesUpdateCommand() = default;
-  inline explicit ValuesUpdateCommand(const std::vector<ValueUpdate>& updates) : _updates(updates) {}
   ~ValuesUpdateCommand() override = default;
 
-  inline const std::vector<ValueUpdate>& GetUpdates() const { return _updates; }
+  inline void SetStartingHra(double value) { _starting_hra = value; }
+  inline void SetAccelerationFactor(double value) { _acceleration_factor = value; }
+
+  [[nodiscard]] inline const std::optional<double>& GetStartingHra() const { return _starting_hra; }
+  [[nodiscard]] inline const std::optional<double>& GetAccelerationFactor() const { return _acceleration_factor; }
 
   [[nodiscard]] std::string ToJson() override;
 
 private:
   inline void Visit(ReflectorsControllerCommandVisitor& visitor) override { visitor.ProcessCommand(*this); }
 
-  std::vector<ValueUpdate> _updates;
+  std::optional<double> _starting_hra;
+  std::optional<double> _acceleration_factor;
 };
 
 void to_json(nlohmann::json& j, const ValuesUpdateCommand& command);

@@ -13,7 +13,7 @@ class RebootCommand;
 class SetPositionCommand;
 class GoCommand;
 class RequestConfigurationCommand;
-class MoveCommand;
+class ManualMoveCommand;
 
 class ReflectorsControllerCommandVisitor {
 public:
@@ -34,7 +34,7 @@ public:
 
   virtual void ProcessCommand(const RequestConfigurationCommand&) = 0;
 
-  virtual void ProcessCommand(const MoveCommand&) = 0;
+  virtual void ProcessCommand(const ManualMoveCommand&) = 0;
 };
 
 }  // namespace voltiris::controller

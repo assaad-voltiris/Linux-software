@@ -7,8 +7,8 @@ std::string ErrorUpdate::ToJson() {
   return j.dump();
 }
 
-void to_json(nlohmann::json& j, const ErrorUpdate& update) { j = nlohmann::json{{"id", "ErrorUpdate"}, {"error", update.GetError()}}; }
+void to_json(nlohmann::json& j, const ErrorUpdate& update) { j = nlohmann::json{{"id", "Error"}, {"e", update.GetError()}}; }
 
-void from_json(const nlohmann::json& j, ErrorUpdate& update) { update = ErrorUpdate(j.at("error").get<std::string>()); }
+void from_json(const nlohmann::json& j, ErrorUpdate& update) { update = ErrorUpdate(j.at("e").get<std::string>()); }
 
 }  // namespace voltiris::controller

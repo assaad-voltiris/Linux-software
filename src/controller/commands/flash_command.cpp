@@ -7,7 +7,7 @@ std::string FlashCommand::ToJson() {
   return j.dump();
 }
 
-void to_json(nlohmann::json& j, const FlashCommand& command) { j = nlohmann::json{{"id", "FlashCommand"}}; }
+void to_json(nlohmann::json& j, const FlashCommand& command) { j = nlohmann::json{{"id", "Flash"}}; }
 
 void from_json(const nlohmann::json& j, FlashCommand& command) { command = FlashCommand(); }
 

@@ -13,13 +13,13 @@
 
 namespace voltiris::presentation::ui {
 
-class MenuWindowComponent : public WindowComponent {
+class ControllerStatusWindowComponent : public WindowComponent {
 public:
-  explicit MenuWindowComponent(controller::ControllerCommandsHandler& commands_handler) : WindowComponent(commands_handler) {}
+  explicit ControllerStatusWindowComponent(controller::ControllerCommandsHandler& commands_handler) : WindowComponent(commands_handler) {}
 
   void Render(double scale) override;
 
-  void OnControllerStatusUpdate(controller::ControllerStatus status) override { _controller_status = status; }
+  void OnControllerStatusUpdate(controller::ControllerStatus status) override;
 
   // RENDERING LOGIC
 
@@ -27,6 +27,7 @@ public:
 
 private:
   controller::ControllerStatus _controller_status = controller::ControllerStatus::kIdle;
+  std::string _controller_status_str;
 
   // RENDERING LOGIC
 
@@ -34,4 +35,3 @@ private:
 };
 
 }  // namespace voltiris::presentation::ui
-

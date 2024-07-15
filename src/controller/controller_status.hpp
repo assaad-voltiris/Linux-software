@@ -2,6 +2,6 @@
 
 namespace voltiris::controller {
 
-enum class ControllerStatus { kIdle, kError, kMoving };
+enum class ControllerStatus { kIdle, kOperating, kMoving, kTracking, kCommunicating };
 
 }  // namespace voltiris::controller

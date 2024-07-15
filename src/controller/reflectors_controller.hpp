@@ -10,6 +10,8 @@
 #include <controller/commands/reflectors_controller_command_visitor.hpp>
 #include <controller/controller_commands_handler.hpp>
 #include <controller/controller_update_listener.hpp>
+#include <controller/reflectors_controller_internal_state.hpp>
+#include <controller/utils/changeable.hpp>
 
 namespace voltiris::controller {
 
@@ -36,13 +38,14 @@ private:
   void ProcessCommand(const RebootCommand &command) override;
   void ProcessCommand(const SetPositionCommand &command) override;
   void ProcessCommand(const GoCommand &command) override;
-  void ProcessCommand(const MoveCommand &command) override;
+  void ProcessCommand(const ManualMoveCommand &command) override;
 
 private:
   void ControllerThreadExecute();
 
   void ExecuteCommands();
-  void UpdateData();
+  ReflectorsControllerIterationState UpdateData(double old_hra);
+  void ProcessUpdates(const ReflectorsControllerIterationState& new_state);
 
   ControllerUpdateListener *_update_listener = nullptr;
 
@@ -52,16 +55,21 @@ private:
   std::queue<std::unique_ptr<ReflectorsControllerCommand>> _commands_queue;
   std::mutex _commands_queue_mutex;
 
+  ControllerStatus _status = ControllerStatus::kIdle;
+
   std::int32_t _com_port = -1;
 
-  double _cycles_frequency = 1;
-  bool _hra_enabled = false;
-  double _hra = 200;
-  double _hra_input = 0;
-  double _acceleration_factor = 1;
+  ReflectorsControllerInternalState _internal_state;
+  ReflectorsControllerIterationState _iteration_state;
 
-  double _latitude = 0;
-  double _longitude = 0;
+//  double _cycles_frequency = 1;
+//  bool _hra_enabled = false;
+//  double _hra = 200;
+//  double _hra_input = 0;
+//  double _acceleration_factor = 1;
+//
+//  double _latitude = 0;
+//  double _longitude = 0;
 
   // Internal variables
   std::vector<ReflectorState> _reflectors;
@@ -69,11 +77,13 @@ private:
 
   std::chrono::steady_clock::time_point _start_time;
 
+
+
   // Old
-  double _temp_hra_old = 200;
-  double _hra_old = 200;
-  double _hrar_old = 0;
-  double _acceleration_factor_old = 0;
+//  double _temp_hra_old = 200;
+//  double _hra_old = 200;
+//  double _hrar_old = 0;
+//  double _acceleration_factor_old = 0;
 };
 
 }  // namespace voltiris::controller

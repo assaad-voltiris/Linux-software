@@ -7,7 +7,7 @@ std::string BusDisconnectedUpdate::ToJson() {
   return j.dump();
 }
 
-void to_json(nlohmann::json& j, const BusDisconnectedUpdate& update) { j = nlohmann::json{{"id", "BusDisconnectedUpdate"}}; }
+void to_json(nlohmann::json& j, const BusDisconnectedUpdate& update) { j = nlohmann::json{{"id", "BusDisconnected"}}; }
 
 void from_json(const nlohmann::json& j, BusDisconnectedUpdate& update) { update = BusDisconnectedUpdate(); }
 

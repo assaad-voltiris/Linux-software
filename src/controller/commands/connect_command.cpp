@@ -7,8 +7,8 @@ std::string ConnectCommand::ToJson() {
   return j.dump();
 }
 
-void to_json(nlohmann::json& j, const ConnectCommand& command) { j = nlohmann::json{{"id", "ConnectCommand"}, {"bus_name", command.GetBusName()}}; }
+void to_json(nlohmann::json& j, const ConnectCommand& command) { j = nlohmann::json{{"id", "Connect"}, {"b", command.GetBusName()}}; }
 
-void from_json(const nlohmann::json& j, ConnectCommand& command) { command = ConnectCommand(j.at("bus_name").get<std::string>()); }
+void from_json(const nlohmann::json& j, ConnectCommand& command) { command = ConnectCommand(j.at("b").get<std::string>()); }
 
 }  // namespace voltiris::controller

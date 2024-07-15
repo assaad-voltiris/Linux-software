@@ -15,7 +15,7 @@ add_executable(${PROJECT_NAME}
         src/controller/commands/go_command.cpp
         src/controller/commands/initialization_command.cpp
         src/controller/commands/load_configuration_command.cpp
-        src/controller/commands/move_command.cpp
+        src/controller/commands/manual_move_command.cpp
         src/controller/commands/read_command.cpp
         src/controller/commands/reboot_command.cpp
         src/controller/commands/request_configuration_command.cpp
@@ -45,6 +45,7 @@ add_executable(${PROJECT_NAME}
         src/presentation/ui/window_components/manual_reflectors_alignment_window_component.cpp
         src/presentation/ui/window_components/menu_window_component.cpp
         src/presentation/ui/window_components/reflectors_data_window_component.cpp
+        src/presentation/ui/window_components/controller_status_window_component.cpp
 
         # ImGui impl bindings
         bindings/imgui_impl_glfw.cpp
@@ -59,6 +60,7 @@ if (NOT WIN32)
             src/presentation/server/server.cpp
 
             src/controller/reflectors_controller.cpp
+            src/controller/reflectors_controller_commands_processor.cpp
             src/controller/utils/communication.cpp
             src/controller/utils/converters.cpp
             src/controller/utils/reflector.cpp

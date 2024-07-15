@@ -8,11 +8,11 @@ std::string LoadConfigurationCommand::ToJson() {
 }
 
 void to_json(nlohmann::json& j, const LoadConfigurationCommand& command) {
-  j = nlohmann::json{{"id", "LoadConfigurationCommand"}, {"file_path", command.GetFilePath()}, {"file_content", command.GetFileContent()}};
+  j = nlohmann::json{{"id", "LoadConfiguration"}, {"p", command.GetFilePath()}, {"c", command.GetFileContent()}};
 }
 
 void from_json(const nlohmann::json& j, LoadConfigurationCommand& command) {
-  command = LoadConfigurationCommand(j.at("file_path").get<std::string>(), j.at("file_content").get<std::string>());
+  command = LoadConfigurationCommand(j.at("p").get<std::string>(), j.at("c").get<std::string>());
 }
 
 }  // namespace voltiris::controller

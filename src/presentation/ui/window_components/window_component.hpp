@@ -5,6 +5,7 @@
 #pragma once
 
 #include <controller/controller_commands_handler.hpp>
+#include <controller/controller_status.hpp>
 
 namespace voltiris::presentation::ui {
 
@@ -14,9 +15,10 @@ public:
 
   void SendCommand(std::unique_ptr<controller::ReflectorsControllerCommand> command) { _commands_handler.OnCommand(std::move(command)); }
 
-  //virtual bool Init() = 0;
+  // virtual bool Init() = 0;
 
   virtual void Render(double scale) = 0;
+  virtual void OnControllerStatusUpdate(controller::ControllerStatus status) = 0;
 
 private:
   controller::ControllerCommandsHandler& _commands_handler;

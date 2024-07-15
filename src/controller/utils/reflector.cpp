@@ -238,4 +238,24 @@ bool Move(std::int32_t com_port, ReflectorState& reflector, double azimuth, doub
   return result;
 }
 
+std::pair<double, double> GetManualMovePosition(std::int32_t com_port, ReflectorState& reflector, double azimuth, double elevation) {
+  double n_step_azimuth_f = std::abs(azimuth / 10.0);
+  double n_step_elevation_f = std::abs(elevation / 10.0);
+  double n_step_f = std::max(n_step_azimuth_f, n_step_elevation_f);
+
+  auto n_step = static_cast<std::size_t>(std::ceil(n_step_f));
+
+  for (std::size_t j = 0; j < n_step; j++) {
+    // 1) compute delta in mm
+
+    double delta_azimuth_mm = -((azimuth / static_cast<double>(n_step)) / reflector.a1);
+    double delta_elevation_mm =
+        -(((elevation / static_cast<double>(n_step)) / reflector.a3) - reflector.a2 * (azimuth / static_cast<double>(n_step)) / (reflector.a1 * reflector.a3));
+
+    double target_pos_azimuth_mm = delta_azimuth_mm + reflector.actual_position_azimuth_mm;
+    double target_pos_elevation_mm = delta_elevation_mm + reflector.actual_position_elevation_mm;
+    Move(com_port, reflector, target_pos_azimuth_mm, target_pos_elevation_mm);
+  }
+}
+
 }  // namespace voltiris::controller::utils

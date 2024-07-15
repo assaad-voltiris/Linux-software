@@ -7,7 +7,7 @@ std::string CPUpdate::ToJson() {
   return j.dump();
 }
 
-void to_json(nlohmann::json& j, const CPUpdate& update) { j = nlohmann::json{{"id", "CPUpdate"}}; }
+void to_json(nlohmann::json& j, const CPUpdate& update) { j = nlohmann::json{{"id", "CP"}}; }
 
 void from_json(const nlohmann::json& j, CPUpdate& update) { update = CPUpdate(); }
 

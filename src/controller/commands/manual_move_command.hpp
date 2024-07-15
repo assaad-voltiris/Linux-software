@@ -9,14 +9,14 @@
 
 namespace voltiris::controller {
 
-class MoveCommand : public ReflectorsControllerCommand {
+class ManualMoveCommand : public ReflectorsControllerCommand {
 public:
   enum class Direction { kUp, kDown, kEast, kWest };
 
-  inline explicit MoveCommand() = default;
-  inline explicit MoveCommand(Direction direction, double step, const std::vector<std::size_t>& reflectors)
+  inline explicit ManualMoveCommand() = default;
+  inline explicit ManualMoveCommand(Direction direction, double step, const std::vector<std::size_t>& reflectors)
       : _direction(direction), _step(step), _reflectors(reflectors) {}
-  ~MoveCommand() override = default;
+  ~ManualMoveCommand() override = default;
 
   [[nodiscard]] Direction GetDirection() const { return _direction; }
   [[nodiscard]] double GetStep() const { return _step; }
@@ -32,8 +32,8 @@ private:
   std::vector<std::size_t> _reflectors;
 };
 
-void to_json(nlohmann::json& j, const MoveCommand& command);
+void to_json(nlohmann::json& j, const ManualMoveCommand& command);
 
-void from_json(const nlohmann::json& j, MoveCommand& command);
+void from_json(const nlohmann::json& j, ManualMoveCommand& command);
 
 }  // namespace voltiris::controller

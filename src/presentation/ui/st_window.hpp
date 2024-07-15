@@ -18,6 +18,7 @@
 #include <presentation/ui/window_components/automatic_sun_tracking_window_component.hpp>
 #include <presentation/ui/window_components/calibration_position_window_component.hpp>
 #include <presentation/ui/window_components/configuration_window_component.hpp>
+#include <presentation/ui/window_components/controller_status_window_component.hpp>
 #include <presentation/ui/window_components/error_window_component.hpp>
 #include <presentation/ui/window_components/manual_reflectors_alignment_window_component.hpp>
 #include <presentation/ui/window_components/menu_window_component.hpp>
@@ -69,6 +70,8 @@ private:
   ReflectorsDataWindowComponent _rd_window_component;
 
   ErrorWindowComponent _error_window_component;
+
+  ControllerStatusWindowComponent _cs_window_component;
 };
 
 }  // namespace voltiris::presentation::ui

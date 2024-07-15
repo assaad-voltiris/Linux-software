@@ -20,6 +20,8 @@ public:
 
   void Render(double scale) override;
 
+  void OnControllerStatusUpdate(controller::ControllerStatus status) override { _controller_status = status; }
+
   // RENDERING LOGIC
 
   // DATA
@@ -29,6 +31,8 @@ public:
   void OnAccelerationFactor(double value);
 
 private:
+  controller::ControllerStatus _controller_status = controller::ControllerStatus::kIdle;
+
   // RENDERING LOGIC
   std::int32_t _cycle_frequency_current_index = 0;
 

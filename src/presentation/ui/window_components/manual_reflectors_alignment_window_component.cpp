@@ -6,7 +6,7 @@
 
 #include <imgui.h>
 
-#include <controller/commands/move_command.hpp>
+#include <controller/commands/manual_move_command.hpp>
 
 namespace voltiris::presentation::ui {
 
@@ -17,19 +17,23 @@ void ManualReflectorsAlignmentWindowComponent::Render(double scale) {  // Genera
   ImGui::SeparatorText("Manual Reflectors Alignment");
 
   if (ImGui::Button("UP")) {
-    SendCommand(std::make_unique<controller::MoveCommand>(controller::MoveCommand::Direction::kUp, _step_size, GetReflectorsToMove(_reflectors_data)));
+    SendCommand(
+        std::make_unique<controller::ManualMoveCommand>(controller::ManualMoveCommand::Direction::kUp, _step_size, GetReflectorsToMove(_reflectors_data)));
   }
   ImGui::SameLine();
   if (ImGui::Button("DOWN")) {
-    SendCommand(std::make_unique<controller::MoveCommand>(controller::MoveCommand::Direction::kDown, _step_size, GetReflectorsToMove(_reflectors_data)));
+    SendCommand(
+        std::make_unique<controller::ManualMoveCommand>(controller::ManualMoveCommand::Direction::kDown, _step_size, GetReflectorsToMove(_reflectors_data)));
   }
   ImGui::SameLine();
   if (ImGui::Button("EAST")) {
-    SendCommand(std::make_unique<controller::MoveCommand>(controller::MoveCommand::Direction::kEast, _step_size, GetReflectorsToMove(_reflectors_data)));
+    SendCommand(
+        std::make_unique<controller::ManualMoveCommand>(controller::ManualMoveCommand::Direction::kEast, _step_size, GetReflectorsToMove(_reflectors_data)));
   }
   ImGui::SameLine();
   if (ImGui::Button("WEST")) {
-    SendCommand(std::make_unique<controller::MoveCommand>(controller::MoveCommand::Direction::kWest, _step_size, GetReflectorsToMove(_reflectors_data)));
+    SendCommand(
+        std::make_unique<controller::ManualMoveCommand>(controller::ManualMoveCommand::Direction::kWest, _step_size, GetReflectorsToMove(_reflectors_data)));
   }
 
   ImGui::InputDouble("Step size (°)", &_step_size);

@@ -8,9 +8,9 @@ std::string StatusUpdate::ToJson() {
 }
 
 void to_json(nlohmann::json& j, const StatusUpdate& update) {
-  j = nlohmann::json{{"id", "StatusUpdate"}, {"status", static_cast<std::uint32_t>(update.GetStatus())}};
+  j = nlohmann::json{{"id", "Status"}, {"s", static_cast<std::uint32_t>(update.GetStatus())}};
 }
 
-void from_json(const nlohmann::json& j, StatusUpdate& update) { update = StatusUpdate(static_cast<ControllerStatus>(j.at("status").get<std::uint32_t>())); }
+void from_json(const nlohmann::json& j, StatusUpdate& update) { update = StatusUpdate(static_cast<ControllerStatus>(j.at("s").get<std::uint32_t>())); }
 
 }  // namespace voltiris::controller

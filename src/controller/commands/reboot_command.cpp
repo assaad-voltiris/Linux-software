@@ -7,7 +7,7 @@ std::string RebootCommand::ToJson() {
   return j.dump();
 }
 
-void to_json(nlohmann::json& j, const RebootCommand& command) { j = nlohmann::json{{"id", "RebootCommand"}}; }
+void to_json(nlohmann::json& j, const RebootCommand& command) { j = nlohmann::json{{"id", "Reboot"}}; }
 
 void from_json(const nlohmann::json& j, RebootCommand& command) { command = RebootCommand(); }
 

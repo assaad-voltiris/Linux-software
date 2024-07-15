@@ -7,7 +7,7 @@ std::string ReadCommand::ToJson() {
   return j.dump();
 }
 
-void to_json(nlohmann::json& j, const ReadCommand& command) { j = nlohmann::json{{"id", "ReadCommand"}}; }
+void to_json(nlohmann::json& j, const ReadCommand& command) { j = nlohmann::json{{"id", "Read"}}; }
 
 void from_json(const nlohmann::json& j, ReadCommand& command) { command = ReadCommand(); }
 

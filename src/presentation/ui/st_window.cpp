@@ -30,7 +30,8 @@ STWindow::STWindow(controller::ControllerCommandsHandler &commands_handler, bool
       _ast_window_component(_commands_handler),
       _cp_window_component(_commands_handler),
       _rd_window_component(_commands_handler),
-      _error_window_component(_commands_handler) {
+      _error_window_component(_commands_handler),
+      _cs_window_component(commands_handler) {
   spdlog::info("Dialogs availability: {}", pfd::settings::available());
 }
 
@@ -119,7 +120,20 @@ void STWindow::ProcessUpdate(const controller::ErrorUpdate &update) {
   _error_window_component.OnError(update.GetError());
 }
 
-void STWindow::ProcessUpdate(const controller::StatusUpdate &update) { spdlog::debug("StatusUpdate received."); }
+void STWindow::ProcessUpdate(const controller::StatusUpdate &update) {
+  spdlog::debug("StatusUpdate received.");
+  _atc_window_component.OnControllerStatusUpdate(update.GetStatus());
+
+  _menu_window_component.OnControllerStatusUpdate(update.GetStatus());
+  _configuration_windows_component.OnControllerStatusUpdate(update.GetStatus());
+  _atc_window_component.OnControllerStatusUpdate(update.GetStatus());
+  _mra_window_component.OnControllerStatusUpdate(update.GetStatus());
+  _ast_window_component.OnControllerStatusUpdate(update.GetStatus());
+  _cp_window_component.OnControllerStatusUpdate(update.GetStatus());
+  _rd_window_component.OnControllerStatusUpdate(update.GetStatus());
+  _error_window_component.OnControllerStatusUpdate(update.GetStatus());
+  _cs_window_component.OnControllerStatusUpdate(update.GetStatus());
+}
 
 void STWindow::Render(float scale) {
   ImGui::Begin("Global", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoCollapse);
@@ -137,6 +151,8 @@ void STWindow::Render(float scale) {
 
   ImGui::SameLine();
   _cp_window_component.Render(scale);
+
+  _cs_window_component.Render(scale);
 
   _rd_window_component.Render(scale);
 
