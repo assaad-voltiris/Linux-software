@@ -392,7 +392,13 @@ void ReflectorsController::ControllerThreadExecute() {
 
     auto new_state = UpdateData(_internal_state.starting_hra);
 
-    if (_internal_state.is_tracking) { ProcessTracking(new_state); }
+    ProcessUpdates(new_state);
+
+    if (_internal_state.is_tracking) {
+      try {
+        ProcessTracking(new_state);
+      } catch (const std::runtime_error &ex) { _update_listener->OnUpdate(std::make_unique<ErrorUpdate>(std::string("Tracking error: ") + ex.what())); }
+    }
 
     ProcessUpdates(new_state);
 
