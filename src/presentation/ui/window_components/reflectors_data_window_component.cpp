@@ -16,6 +16,8 @@
 namespace voltiris::presentation::ui {
 
 void ReflectorsDataWindowComponent::Render(double scale) {
+  ImGui::BeginDisabled(GetControllerStatus() == controller::ControllerStatus::kMoving || GetControllerStatus() == controller::ControllerStatus::kTracking);
+
   // General group for ReflectorsData
   ImGui::BeginGroup();
 
@@ -67,6 +69,8 @@ void ReflectorsDataWindowComponent::Render(double scale) {
 
   ImGui::EndChild();
   ImGui::EndGroup();
+
+  ImGui::EndDisabled();
 }
 
 void ReflectorsDataWindowComponent::RenderRealRow(const controller::ReflectorState& reflector_data, std::size_t i) {

@@ -20,19 +20,15 @@ public:
 
   void Render(double scale) override;
 
-  void OnControllerStatusUpdate(controller::ControllerStatus status) override { _controller_status = status; }
-
   // RENDERING LOGIC
 
   // DATA
   void OnCycleFrequency(double value);
   void OnStartingHraEnabled(bool value);
   void OnStartingHra(double value);
-  void OnAccelerationFactor(double value);
+  void OnAccelerationFactor(std::int32_t value);
 
 private:
-  controller::ControllerStatus _controller_status = controller::ControllerStatus::kIdle;
-
   // RENDERING LOGIC
   std::int32_t _cycle_frequency_current_index = 0;
 
@@ -51,7 +47,7 @@ private:
   bool _starting_hra_enabled = false;
   double _starting_hra = Resources::kATSStartingHraDefaultValue;
 
-  std::int32_t _acceleration_factor_current_index = 0;
+  std::int32_t _acceleration_factor = 0;
 
   // DATA
 };

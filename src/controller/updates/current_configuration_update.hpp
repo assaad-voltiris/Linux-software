@@ -13,7 +13,7 @@ class CurrentConfigurationUpdate : public ReflectorsControllerUpdate {
 public:
   inline explicit CurrentConfigurationUpdate() = default;
   inline explicit CurrentConfigurationUpdate(double latitude, double longitude, double cycle_frequency, bool starting_hra_enabled, double starting_hra,
-                                             double acceleration_factor)
+                                             std::int32_t acceleration_factor)
       : _latitude(latitude),
         _longitude(longitude),
         _cycle_frequency(cycle_frequency),
@@ -27,7 +27,7 @@ public:
   [[nodiscard]] double GetCycleFrequency() const { return _cycle_frequency; }
   [[nodiscard]] bool GetStartingHraEnabled() const { return _starting_hra_enabled; }
   [[nodiscard]] double GetStartingHra() const { return _starting_hra; }
-  [[nodiscard]] double GetAccelerationFactor() const { return _acceleration_factor; }
+  [[nodiscard]] std::int32_t GetAccelerationFactor() const { return _acceleration_factor; }
 
   [[nodiscard]] std::string ToJson() override;
 
@@ -39,7 +39,7 @@ private:
   double _cycle_frequency = 0;
   bool _starting_hra_enabled = false;
   double _starting_hra = 0;
-  double _acceleration_factor = 0;
+  std::int32_t _acceleration_factor = 0;
 };
 
 void to_json(nlohmann::json& j, const CurrentConfigurationUpdate& update);

@@ -13,6 +13,8 @@
 #include <controller/commands/reboot_command.hpp>
 #include <controller/commands/request_configuration_command.hpp>
 #include <controller/commands/set_position_command.hpp>
+#include <controller/commands/start_tracking_command.hpp>
+#include <controller/commands/stop_tracking_command.hpp>
 #include <controller/commands/values_update_command.hpp>
 
 namespace voltiris::controller {
@@ -44,6 +46,10 @@ std::unique_ptr<ReflectorsControllerCommand> ReflectorsControllerCommand::FromJs
     return std::make_unique<RequestConfigurationCommand>(json.template get<RequestConfigurationCommand>());
   } else if (json["id"] == "ManualMove") {
     return std::make_unique<ManualMoveCommand>(json.template get<ManualMoveCommand>());
+  } else if (json["id"] == "StartTracking") {
+    return std::make_unique<StartTrackingCommand>(json.template get<StartTrackingCommand>());
+  } else if (json["id"] == "StopTracking") {
+    return std::make_unique<StopTrackingCommand>(json.template get<StopTrackingCommand>());
   }
   return nullptr;
 }

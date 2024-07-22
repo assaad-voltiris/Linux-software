@@ -19,7 +19,7 @@ void to_json(nlohmann::json& j, const ValuesUpdateCommand& command) {
 
 void from_json(const nlohmann::json& j, ValuesUpdateCommand& command) {
   if (j.contains("h")) { command.SetStartingHra(j["h"].get<double>()); }
-  if (j.contains("a")) { command.SetAccelerationFactor(j["a"].get<double>()); }
+  if (j.contains("a")) { command.SetAccelerationFactor(j["a"].get<std::int32_t>()); }
 }
 
 }  // namespace voltiris::controller

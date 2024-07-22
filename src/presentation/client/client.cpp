@@ -45,7 +45,10 @@ bool Client::Init() {
   return true;
 }
 
-bool Client::Cleanup() { return false; }
+bool Client::Cleanup() {
+  Stop();
+  return true;
+}
 
 void Client::Start() {
   _thread = std::thread([this]() { _client.run(); });

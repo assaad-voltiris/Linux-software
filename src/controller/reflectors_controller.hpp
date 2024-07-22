@@ -39,13 +39,16 @@ private:
   void ProcessCommand(const SetPositionCommand &command) override;
   void ProcessCommand(const GoCommand &command) override;
   void ProcessCommand(const ManualMoveCommand &command) override;
+  void ProcessCommand(const StartTrackingCommand &command) override;
+  void ProcessCommand(const StopTrackingCommand &command) override;
 
 private:
   void ControllerThreadExecute();
 
   void ExecuteCommands();
   ReflectorsControllerIterationState UpdateData(double old_hra);
-  void ProcessUpdates(const ReflectorsControllerIterationState& new_state);
+  void ProcessUpdates(const ReflectorsControllerIterationState &new_state);
+  void ProcessTracking(const ReflectorsControllerIterationState &current_state);
 
   ControllerUpdateListener *_update_listener = nullptr;
 
@@ -55,35 +58,17 @@ private:
   std::queue<std::unique_ptr<ReflectorsControllerCommand>> _commands_queue;
   std::mutex _commands_queue_mutex;
 
-  ControllerStatus _status = ControllerStatus::kIdle;
+  ControllerStatus _status = ControllerStatus::kOperating;
+  ControllerStatus _prev_status = ControllerStatus::kOperating;
 
   std::int32_t _com_port = -1;
 
   ReflectorsControllerInternalState _internal_state;
   ReflectorsControllerIterationState _iteration_state;
 
-//  double _cycles_frequency = 1;
-//  bool _hra_enabled = false;
-//  double _hra = 200;
-//  double _hra_input = 0;
-//  double _acceleration_factor = 1;
-//
-//  double _latitude = 0;
-//  double _longitude = 0;
-
   // Internal variables
   std::vector<ReflectorState> _reflectors;
   std::vector<ReflectorState> _reflectors_copy;
-
-  std::chrono::steady_clock::time_point _start_time;
-
-
-
-  // Old
-//  double _temp_hra_old = 200;
-//  double _hra_old = 200;
-//  double _hrar_old = 0;
-//  double _acceleration_factor_old = 0;
 };
 
 }  // namespace voltiris::controller

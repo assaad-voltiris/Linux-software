@@ -28,6 +28,6 @@ bool SetPosition(std::int32_t com_port, ReflectorState& reflector, double azimut
 
 bool Move(std::int32_t com_port, ReflectorState& reflector, double azimuth, double elevation);
 
-std::pair<double, double> GetManualMovePosition(std::int32_t com_port, ReflectorState& reflector, double azimuth, double elevation);
+bool MoveTo(std::int32_t com_port, ReflectorState &reflector, double target_azimuth, double target_elevation);
 
 }  // namespace voltiris::controller::utils

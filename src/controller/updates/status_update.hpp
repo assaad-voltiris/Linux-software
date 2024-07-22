@@ -21,7 +21,7 @@ public:
 private:
   inline void Visit(ReflectorsControllerUpdateVisitor& visitor) override { visitor.ProcessUpdate(*this); }
 
-  ControllerStatus _status = ControllerStatus::kIdle;
+  ControllerStatus _status = ControllerStatus::kOperating;
 };
 
 void to_json(nlohmann::json& j, const StatusUpdate& update);

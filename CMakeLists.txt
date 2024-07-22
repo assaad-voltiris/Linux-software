@@ -4,7 +4,10 @@ project(VoltirisST VERSION 1.0.0 LANGUAGES CXX)
 
 add_executable(${PROJECT_NAME}
         src/main.cpp
+
         src/client_sun_tracking_app.cpp
+
+        src/utils/frame_limiter.cpp
 
         src/presentation/client/client.cpp
 
@@ -21,6 +24,8 @@ add_executable(${PROJECT_NAME}
         src/controller/commands/request_configuration_command.cpp
         src/controller/commands/set_position_command.cpp
         src/controller/commands/values_update_command.cpp
+        src/controller/commands/start_tracking_command.cpp
+        src/controller/commands/stop_tracking_command.cpp
 
         src/controller/updates/reflectors_controller_update.cpp
         src/controller/updates/ast_update.cpp

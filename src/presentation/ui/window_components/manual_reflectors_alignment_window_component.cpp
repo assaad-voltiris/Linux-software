@@ -11,6 +11,7 @@
 namespace voltiris::presentation::ui {
 
 void ManualReflectorsAlignmentWindowComponent::Render(double scale) {  // General group for AcceleratedTrackingSettings
+  ImGui::BeginDisabled(GetControllerStatus() == controller::ControllerStatus::kMoving || GetControllerStatus() == controller::ControllerStatus::kTracking);
   ImGui::BeginGroup();
 
   ImGui::BeginChild("Manual Reflectors Alignment", {}, ImGuiChildFlags_AutoResizeX | ImGuiChildFlags_AutoResizeY | ImGuiChildFlags_FrameStyle);
@@ -58,6 +59,8 @@ void ManualReflectorsAlignmentWindowComponent::Render(double scale) {  // Genera
 
   ImGui::EndChild();
   ImGui::EndGroup();
+
+  ImGui::EndDisabled();
 }
 
 std::vector<std::size_t> ManualReflectorsAlignmentWindowComponent::GetReflectorsToMove(const std::vector<ReflectorData>& reflectors_data) {

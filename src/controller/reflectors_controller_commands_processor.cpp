@@ -42,47 +42,6 @@ namespace {
 
 static const double kMaxSecu = 39.0;
 
-bool MoveTo(std::int32_t com_port, ReflectorState &reflector, double target_azimuth, double target_elevation) {
-  bool result = true;
-
-  double azimuth = 0;
-  double elevation = 0;
-  double prev_azimuth = 0;
-  double prev_elevation = 0;
-
-  bool should_continue = false;
-
-  do {
-    result &= utils::ReadPositioningData(com_port, reflector);
-    if (!result) { throw std::runtime_error("Reflectors initial status reading error."); }
-
-    azimuth = target_azimuth;
-    elevation = target_elevation;
-    prev_azimuth = reflector.actual_position_azimuth_mm;
-    prev_elevation = reflector.actual_position_elevation_mm;
-
-    if (std::abs(reflector.actual_position_azimuth_mm - target_azimuth) > kMaxSecu) {
-      azimuth = reflector.actual_position_azimuth_mm +
-                (target_azimuth - reflector.actual_position_azimuth_mm) / std::abs(target_azimuth - reflector.actual_position_azimuth_mm) * (kMaxSecu - 1.00);
-    }
-    if (std::abs(reflector.actual_position_elevation_mm - target_elevation) > kMaxSecu) {
-      elevation = reflector.actual_position_elevation_mm + (target_elevation - reflector.actual_position_elevation_mm) /
-                                                               std::abs(target_elevation - reflector.actual_position_elevation_mm) * (kMaxSecu - 1.00);
-    }
-
-    result &= utils::Move(com_port, reflector, azimuth, elevation);
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
-    result &= utils::ReadPositioningData(com_port, reflector);
-
-    if (!result) { throw std::runtime_error("Reflectors movement error."); }
-
-    should_continue = azimuth != target_azimuth || elevation != target_elevation;
-    should_continue &= prev_azimuth != reflector.actual_position_azimuth_mm || prev_elevation != reflector.actual_position_elevation_mm;
-  } while (should_continue);
-
-  return result;
-}
-
 }  // namespace
 
 std::vector<ReflectorState> ReflectorsControllerCommandsProcessor::ProcessLoadConfigurationCommand(const LoadConfigurationCommand &command) {
@@ -185,7 +144,7 @@ void ReflectorsControllerCommandsProcessor::ProcessSetPositionCommand(const SetP
 void ReflectorsControllerCommandsProcessor::ProcessGoCommand(const GoCommand &command, std::int32_t com_port, std::vector<ReflectorState> &reflectors) {
   if (com_port == -1) { throw std::runtime_error("Reflectors not connected."); }
 
-  bool result = MoveTo(com_port, reflectors[command.GetReflectorIndex()], command.GetAzimuth(), command.GetElevation());
+  bool result = utils::MoveTo(com_port, reflectors[command.GetReflectorIndex()], command.GetAzimuth(), command.GetElevation());
 
   if (!result) { throw std::runtime_error("Reflectors movement error."); }
 }
@@ -217,7 +176,7 @@ void ReflectorsControllerCommandsProcessor::ProcessManualMoveCommand(const Manua
 
       double target_pos_azimuth_mm = delta_azimuth_mm + reflector.actual_position_azimuth_mm;
       double target_pos_elevation_mm = delta_elevation_mm + reflector.actual_position_elevation_mm;
-      MoveTo(com_port, reflector, target_pos_azimuth_mm, target_pos_elevation_mm);
+      utils::MoveTo(com_port, reflector, target_pos_azimuth_mm, target_pos_elevation_mm);
     }
   }
 }

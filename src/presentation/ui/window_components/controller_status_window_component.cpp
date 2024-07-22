@@ -11,11 +11,13 @@
 namespace voltiris::presentation::ui {
 
 std::string ToString(controller::ControllerStatus status) {
-  static const std::map<controller::ControllerStatus, std::string> kStrings{{controller::ControllerStatus::kIdle, "Idle"},
-                                                                            {controller::ControllerStatus::kOperating, "Normal operating"},
-                                                                            {controller::ControllerStatus::kMoving, "Moving reflectors"},
-                                                                            {controller::ControllerStatus::kTracking, "Automatic tracking"},
-                                                                            {controller::ControllerStatus::kCommunicating, "Communicating with reflectors"}};
+  static const std::map<controller::ControllerStatus, std::string> kStrings{
+      {controller::ControllerStatus::kOperating, "Normal operating"},
+      {controller::ControllerStatus::kMoving, "Moving reflectors"},
+      {controller::ControllerStatus::kTracking, "Automatic tracking"},
+      {controller::ControllerStatus::kCommunicating, "Communicating with reflectors"},
+      {controller::ControllerStatus::kTrackingWaiting, "Automatic tracking (waiting for morning time)"},
+      {controller::ControllerStatus::kTrackingReturningNight, "Automatic tracking (returning to morning position)"}};
 
   auto it = kStrings.find(status);
   if (it != kStrings.end()) { return it->second; }

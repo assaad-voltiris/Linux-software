@@ -14,7 +14,6 @@ namespace voltiris::presentation::ui {
 namespace {
 
 const char *kACSCycleFrequency[] = {"1", "2", "7", "OFF"};
-const char *kACSAccelerationFactor[] = {"1", "4", "5", "6", "7", "8", "10", "12", "18", "24"};
 
 }  // namespace
 
@@ -25,7 +24,7 @@ void AcceleratedTrackingSettingsWindowComponent::OnCycleFrequency(double value) 
   for (std::int32_t i = 0; i < IM_ARRAYSIZE(kACSCycleFrequency); i++) {
     if (value == std::stod(kACSCycleFrequency[i])) {
       _cycle_frequency_current_index = i;
-      break;
+      return;
     }
   }
   _cycle_frequency_current_index = IM_ARRAYSIZE(kACSCycleFrequency) - 1;
@@ -35,17 +34,11 @@ void AcceleratedTrackingSettingsWindowComponent::OnStartingHraEnabled(bool value
 
 void AcceleratedTrackingSettingsWindowComponent::OnStartingHra(double value) { _starting_hra = value; }
 
-void AcceleratedTrackingSettingsWindowComponent::OnAccelerationFactor(double value) {
-  for (std::int32_t i = 0; i < IM_ARRAYSIZE(kACSAccelerationFactor); i++) {
-    if (value == std::stod(kACSAccelerationFactor[i])) {
-      _acceleration_factor_current_index = i;
-      break;
-    }
-  }
-  _acceleration_factor_current_index = IM_ARRAYSIZE(kACSAccelerationFactor) - 1;
-}
+void AcceleratedTrackingSettingsWindowComponent::OnAccelerationFactor(std::int32_t value) { _acceleration_factor = value; }
 
 void AcceleratedTrackingSettingsWindowComponent::Render(double scale) {
+  ImGui::BeginDisabled(GetControllerStatus() == controller::ControllerStatus::kTracking);
+
   // General group for AcceleratedTrackingSettings
   ImGui::BeginGroup();
 
@@ -111,11 +104,12 @@ void AcceleratedTrackingSettingsWindowComponent::Render(double scale) {
 
   // Bottom line
   ImGui::BeginGroup();
-  if (ImGui::Checkbox("Enable Starting Hra", &_starting_hra_enabled)) {
+  if (ImGui::Checkbox("##Enable Starting Hra", &_starting_hra_enabled)) {
     controller::ValuesUpdateCommand cmd;
     cmd.SetStartingHra(_starting_hra_enabled ? _starting_hra : -1);
     SendCommand(std::make_unique<controller::ValuesUpdateCommand>(cmd));
   }
+  ImGui::SameLine();
   ImGui::BeginDisabled(!_starting_hra_enabled);
   if (ImGui::InputDouble("Starting Hra", &_starting_hra)) {
     controller::ValuesUpdateCommand cmd;
@@ -123,18 +117,19 @@ void AcceleratedTrackingSettingsWindowComponent::Render(double scale) {
     SendCommand(std::make_unique<controller::ValuesUpdateCommand>(cmd));
   }
   ImGui::EndDisabled();
-  if (ImGui::BeginCombo("Acceleration Factor", kACSAccelerationFactor[_acceleration_factor_current_index], ImGuiComboFlags_WidthFitPreview)) {
-    for (std::int32_t i = 0; i < IM_ARRAYSIZE(kACSAccelerationFactor); i++) {
-      const bool is_selected = (_acceleration_factor_current_index == i);
-      if (ImGui::Selectable(kACSAccelerationFactor[i], is_selected)) { _acceleration_factor_current_index = i; }
-      if (is_selected) { ImGui::SetItemDefaultFocus(); }
-    }
-    ImGui::EndCombo();
+
+  if (ImGui::InputInt("Acceleration Factor", &_acceleration_factor)) {
+    controller::ValuesUpdateCommand cmd;
+    cmd.SetAccelerationFactor(_acceleration_factor);
+    SendCommand(std::make_unique<controller::ValuesUpdateCommand>(cmd));
   }
+
   ImGui::EndGroup();
 
   ImGui::EndChild();
   ImGui::EndGroup();
+
+  ImGui::EndDisabled();
 }
 
 }  // namespace voltiris::presentation::ui

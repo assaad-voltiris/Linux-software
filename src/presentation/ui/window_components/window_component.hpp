@@ -13,15 +13,19 @@ class WindowComponent {
 public:
   explicit WindowComponent(controller::ControllerCommandsHandler& commands_handler) : _commands_handler(commands_handler) {}
 
-  void SendCommand(std::unique_ptr<controller::ReflectorsControllerCommand> command) { _commands_handler.OnCommand(std::move(command)); }
-
   // virtual bool Init() = 0;
 
   virtual void Render(double scale) = 0;
-  virtual void OnControllerStatusUpdate(controller::ControllerStatus status) = 0;
+  virtual void OnControllerStatusUpdate(controller::ControllerStatus status) { _controller_status = status; }
+
+protected:
+  void SendCommand(std::unique_ptr<controller::ReflectorsControllerCommand> command) { _commands_handler.OnCommand(std::move(command)); }
+
+  [[nodiscard]] controller::ControllerStatus GetControllerStatus() const { return _controller_status; }
 
 private:
   controller::ControllerCommandsHandler& _commands_handler;
+  controller::ControllerStatus _controller_status = controller::ControllerStatus::kOperating;
 };
 
 }  // namespace voltiris::presentation::ui

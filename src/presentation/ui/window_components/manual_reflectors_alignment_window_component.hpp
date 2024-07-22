@@ -21,8 +21,6 @@ public:
 
   void Render(double scale) override;
 
-  void OnControllerStatusUpdate(controller::ControllerStatus status) override { _controller_status = status; }
-
   // RENDERING LOGIC
 
   // DATA
@@ -33,7 +31,6 @@ public:
   void OnReflectorState(std::size_t reflector_index, const controller::ReflectorState& new_state) { _reflectors_data[reflector_index].id = new_state.id; }
 
 private:
-  controller::ControllerStatus _controller_status = controller::ControllerStatus::kIdle;
 
   // RENDERING LOGIC
   double _step_size = Resources::kMRAStepSizeDefaultValue;

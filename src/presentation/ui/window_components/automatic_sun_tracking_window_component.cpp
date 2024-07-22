@@ -6,6 +6,8 @@
 
 #include <imgui.h>
 
+#include <controller/commands/start_tracking_command.hpp>
+#include <controller/commands/stop_tracking_command.hpp>
 #include <controller/commands/values_update_command.hpp>
 
 namespace voltiris::presentation::ui {
@@ -14,18 +16,26 @@ AutomaticSunTrackingWindowComponent::AutomaticSunTrackingWindowComponent(control
     : WindowComponent(commands_handler) {}
 
 void AutomaticSunTrackingWindowComponent::Render(double scale) {
+  ImGui::BeginDisabled(GetControllerStatus() == controller::ControllerStatus::kMoving);
+
   // General group for AutomaticSunTracking
   ImGui::BeginGroup();
 
   ImGui::BeginChild("Automatic Sun Tracking", {}, ImGuiChildFlags_AutoResizeX | ImGuiChildFlags_AutoResizeY | ImGuiChildFlags_FrameStyle);
   ImGui::SeparatorText("Automatic Sun Tracking");
 
+  ImGui::BeginDisabled();
   ImGui::InputDouble("Latitude (°)", &_latitude);
   ImGui::InputDouble("Longitude (°)", &_longitude);
+  ImGui::EndDisabled();
 
-  if (ImGui::Button("START TRACKING")) {}
+  ImGui::BeginDisabled(GetControllerStatus() == controller::ControllerStatus::kTracking);
+  if (ImGui::Button("START TRACKING")) { SendCommand(std::make_unique<controller::StartTrackingCommand>()); }
+  ImGui::EndDisabled();
   ImGui::SameLine();
-  if (ImGui::Button("STOP TRACKING")) {}
+  ImGui::BeginDisabled(GetControllerStatus() != controller::ControllerStatus::kTracking);
+  if (ImGui::Button("STOP TRACKING")) { SendCommand(std::make_unique<controller::StopTrackingCommand>()); }
+  ImGui::EndDisabled();
 
   if (ImGui::Button("Count Cycles")) {}
   ImGui::SameLine();
@@ -40,6 +50,9 @@ void AutomaticSunTrackingWindowComponent::Render(double scale) {
 
   ImGui::EndChild();
   ImGui::EndGroup();
+
+  ImGui::EndDisabled();
 }
 
 }  // namespace voltiris::presentation::ui
+

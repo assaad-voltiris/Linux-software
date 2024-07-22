@@ -26,7 +26,7 @@ public:
   // DATA
 
 private:
-  controller::ControllerStatus _controller_status = controller::ControllerStatus::kIdle;
+  controller::ControllerStatus _controller_status = controller::ControllerStatus::kOperating;
   std::string _controller_status_str;
 
   // RENDERING LOGIC

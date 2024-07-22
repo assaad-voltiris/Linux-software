@@ -10,6 +10,8 @@
 
 namespace voltiris::controller::utils {
 
+static const double kMaxSecu = 39.0;
+
 ReflectorState LoadReflectorFromConfiguration(const std::string& config) {
   ReflectorState reflector;
 
@@ -238,24 +240,45 @@ bool Move(std::int32_t com_port, ReflectorState& reflector, double azimuth, doub
   return result;
 }
 
-std::pair<double, double> GetManualMovePosition(std::int32_t com_port, ReflectorState& reflector, double azimuth, double elevation) {
-  double n_step_azimuth_f = std::abs(azimuth / 10.0);
-  double n_step_elevation_f = std::abs(elevation / 10.0);
-  double n_step_f = std::max(n_step_azimuth_f, n_step_elevation_f);
+bool MoveTo(std::int32_t com_port, ReflectorState& reflector, double target_azimuth, double target_elevation) {
+  bool result = true;
 
-  auto n_step = static_cast<std::size_t>(std::ceil(n_step_f));
+  double azimuth = 0;
+  double elevation = 0;
+  double prev_azimuth = 0;
+  double prev_elevation = 0;
 
-  for (std::size_t j = 0; j < n_step; j++) {
-    // 1) compute delta in mm
+  bool should_continue = false;
 
-    double delta_azimuth_mm = -((azimuth / static_cast<double>(n_step)) / reflector.a1);
-    double delta_elevation_mm =
-        -(((elevation / static_cast<double>(n_step)) / reflector.a3) - reflector.a2 * (azimuth / static_cast<double>(n_step)) / (reflector.a1 * reflector.a3));
+  do {
+    result &= utils::ReadPositioningData(com_port, reflector);
+    if (!result) { throw std::runtime_error("Reflectors initial status reading error."); }
 
-    double target_pos_azimuth_mm = delta_azimuth_mm + reflector.actual_position_azimuth_mm;
-    double target_pos_elevation_mm = delta_elevation_mm + reflector.actual_position_elevation_mm;
-    Move(com_port, reflector, target_pos_azimuth_mm, target_pos_elevation_mm);
-  }
+    azimuth = target_azimuth;
+    elevation = target_elevation;
+    prev_azimuth = reflector.actual_position_azimuth_mm;
+    prev_elevation = reflector.actual_position_elevation_mm;
+
+    if (std::abs(reflector.actual_position_azimuth_mm - target_azimuth) > kMaxSecu) {
+      azimuth = reflector.actual_position_azimuth_mm +
+                (target_azimuth - reflector.actual_position_azimuth_mm) / std::abs(target_azimuth - reflector.actual_position_azimuth_mm) * (kMaxSecu - 1.00);
+    }
+    if (std::abs(reflector.actual_position_elevation_mm - target_elevation) > kMaxSecu) {
+      elevation = reflector.actual_position_elevation_mm + (target_elevation - reflector.actual_position_elevation_mm) /
+                                                               std::abs(target_elevation - reflector.actual_position_elevation_mm) * (kMaxSecu - 1.00);
+    }
+
+    result &= utils::Move(com_port, reflector, azimuth, elevation);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    result &= utils::ReadPositioningData(com_port, reflector);
+
+    if (!result) { throw std::runtime_error("Reflectors movement error."); }
+
+    should_continue = azimuth != target_azimuth || elevation != target_elevation;
+    should_continue &= prev_azimuth != reflector.actual_position_azimuth_mm || prev_elevation != reflector.actual_position_elevation_mm;
+  } while (should_continue);
+
+  return result;
 }
 
 }  // namespace voltiris::controller::utils
