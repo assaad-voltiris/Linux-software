@@ -419,11 +419,9 @@ void ReflectorsController::ControllerThreadExecute() {
 
     ProcessUpdates(new_state);
 
-    if (_internal_state.is_tracking) {
-      try {
-        ProcessSingleMovement();
-      } catch (const std::runtime_error &ex) { _update_listener->OnUpdate(std::make_unique<ErrorUpdate>(std::string("Movement error: ") + ex.what())); }
-    }
+    try {
+      ProcessSingleMovement();
+    } catch (const std::runtime_error &ex) { _update_listener->OnUpdate(std::make_unique<ErrorUpdate>(std::string("Movement error: ") + ex.what())); }
 
     frame_limiter.LimitFrame();
   }
