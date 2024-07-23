@@ -46,32 +46,14 @@ void AcceleratedTrackingSettingsWindowComponent::Render(double scale) {
   ImGui::BeginChild("Accelerated Tracking Settings", {}, ImGuiChildFlags_AutoResizeX | ImGuiChildFlags_AutoResizeY | ImGuiChildFlags_FrameStyle);
   ImGui::SeparatorText("Accelerated Tracking Settings");
 
-  // First line buttons
-  ImGui::BeginGroup();
-  if (ImGui::Button("Test")) {}
-
-  ImGui::SameLine();
-  if (ImGui::Button("# ##1")) {}
-
-  ImGui::SameLine();
-  if (ImGui::Button("# ##2")) {}
-  ImGui::EndGroup();
-
-  // Center group of items
-  ImGui::BeginGroup();
-
   // Left column
   ImGui::BeginGroup();
-  if (ImGui::Button("MOVE")) {}
-  if (ImGui::BeginCombo("##Cycle frequency", kACSCycleFrequency[_cycle_frequency_current_index], ImGuiComboFlags_WidthFitPreview)) {
-    for (std::int32_t i = 0; i < IM_ARRAYSIZE(kACSCycleFrequency); i++) {
-      const bool is_selected = (_cycle_frequency_current_index == i);
-      if (ImGui::Selectable(kACSCycleFrequency[i], is_selected)) { _cycle_frequency_current_index = i; }
-      if (is_selected) { ImGui::SetItemDefaultFocus(); }
-    }
-    ImGui::EndCombo();
-  }
+  if (ImGui::Button("MOVE", utils::GetRealSize({60, 40}, static_cast<float>(scale)))) {}
+
+  if (ImGui::Button("STOP", utils::GetRealSize({60, 40}, static_cast<float>(scale)))) {}
   ImGui::EndGroup();
+
+  ImGui::SameLine();
 
   // Center column
   ImGui::SameLine();
@@ -95,21 +77,25 @@ void AcceleratedTrackingSettingsWindowComponent::Render(double scale) {
 
   ImGui::EndGroup();
 
-  // Right column
-  ImGui::SameLine();
-  ImGui::BeginGroup();
-  if (ImGui::Button("Move", utils::GetRealSize({80, 60}, static_cast<float>(scale)))) {}
-  ImGui::EndGroup();
-  ImGui::EndGroup();
-
   // Bottom line
   ImGui::BeginGroup();
+  if (ImGui::BeginCombo("Cycles to auto calibration", kACSCycleFrequency[_cycle_frequency_current_index], ImGuiComboFlags_WidthFitPreview)) {
+    for (std::int32_t i = 0; i < IM_ARRAYSIZE(kACSCycleFrequency); i++) {
+      const bool is_selected = (_cycle_frequency_current_index == i);
+      if (ImGui::Selectable(kACSCycleFrequency[i], is_selected)) { _cycle_frequency_current_index = i; }
+      if (is_selected) { ImGui::SetItemDefaultFocus(); }
+    }
+    ImGui::EndCombo();
+  }
+
   if (ImGui::Checkbox("##Enable Starting Hra", &_starting_hra_enabled)) {
     controller::ValuesUpdateCommand cmd;
     cmd.SetStartingHra(_starting_hra_enabled ? _starting_hra : -1);
     SendCommand(std::make_unique<controller::ValuesUpdateCommand>(cmd));
   }
+
   ImGui::SameLine();
+
   ImGui::BeginDisabled(!_starting_hra_enabled);
   if (ImGui::InputDouble("Starting Hra", &_starting_hra)) {
     controller::ValuesUpdateCommand cmd;

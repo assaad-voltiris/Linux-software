@@ -49,6 +49,7 @@ private:
   ReflectorsControllerIterationState UpdateData(double old_hra);
   void ProcessUpdates(const ReflectorsControllerIterationState &new_state);
   void ProcessTracking(const ReflectorsControllerIterationState &current_state);
+  void ProcessSingleMovement();
 
   ControllerUpdateListener *_update_listener = nullptr;
 

@@ -348,14 +348,16 @@ void ReflectorsController::ProcessTracking(const ReflectorsControllerIterationSt
     morning_hra_azimuth_deg = morning_hra_azimuth_deg > (180 + kAzimuthMax) ? (180 + kAzimuthMax) : morning_hra_azimuth_deg;
     morning_hra_azimuth_deg = morning_hra_azimuth_deg < (180 - kAzimuthMax) ? (180 - kAzimuthMax) : morning_hra_azimuth_deg;
 
-    for (auto &reflector : _reflectors) { utils::MoveTo(_com_port, reflector, morning_hra_azimuth_deg, morning_hra_azimuth_deg); }
+    for (auto &reflector : _reflectors) {
+      reflector.should_be_moved_azimuth = morning_hra_azimuth_deg;
+      reflector.should_be_moved_elevation = morning_hra_azimuth_deg;
+    }
 
     spdlog::debug("Reflectors returned to morning position");
   }
 
   if (_internal_state.is_night) { return; }
 
-  bool moved = false;
   for (auto &reflector : _reflectors) {
     double delta_az = reflector.theoretical_position_azimuth_mm - reflector.actual_position_azimuth_mm;
     double delta_el = reflector.theoretical_position_elevation_mm - reflector.actual_position_elevation_mm;
@@ -370,12 +372,27 @@ void ReflectorsController::ProcessTracking(const ReflectorsControllerIterationSt
     double az = std::abs(delta_az) > std::abs(spacing) ? target_az : reflector.actual_position_azimuth_mm;
     double el = std::abs(delta_el) > std::abs(spacing) ? target_el : reflector.actual_position_elevation_mm;
 
-    if (std::abs(delta_az) > std::abs(spacing) || std::abs(delta_el) > std::abs(spacing)) {
-      utils::MoveTo(_com_port, reflector, az, el);
-      moved = true;
-    }
+    if (std::abs(delta_az) > std::abs(spacing)) { reflector.should_be_moved_azimuth = az; }
+    if (std::abs(delta_el) > std::abs(spacing)) { reflector.should_be_moved_elevation = el; }
   }
-  if (moved) { ReflectorsControllerCommandsProcessor::ProcessReadCommand(ReadCommand{}, _com_port, _reflectors); }
+}
+
+void ReflectorsController::ProcessSingleMovement() {
+  for (auto &reflector : _reflectors) {
+    double target_az = reflector.should_be_moved_azimuth.has_value() ? reflector.should_be_moved_azimuth.value() : reflector.actual_position_azimuth_mm;
+    double target_el = reflector.should_be_moved_elevation.has_value() ? reflector.should_be_moved_elevation.value() : reflector.actual_position_elevation_mm;
+
+    if (!reflector.should_be_moved_azimuth.has_value() && !reflector.should_be_moved_elevation.has_value()) { continue; }
+
+    utils::MoveTo(_com_port, reflector, target_az, target_el);
+
+    reflector.should_be_moved_azimuth.reset();
+    reflector.should_be_moved_elevation.reset();
+
+    ReflectorsControllerCommandsProcessor::ProcessReadCommand(ReadCommand{}, _com_port, _reflectors);
+
+    return;
+  }
 }
 
 void ReflectorsController::ControllerThreadExecute() {
@@ -401,6 +418,12 @@ void ReflectorsController::ControllerThreadExecute() {
     }
 
     ProcessUpdates(new_state);
+
+    if (_internal_state.is_tracking) {
+      try {
+        ProcessSingleMovement();
+      } catch (const std::runtime_error &ex) { _update_listener->OnUpdate(std::make_unique<ErrorUpdate>(std::string("Movement error: ") + ex.what())); }
+    }
 
     frame_limiter.LimitFrame();
   }

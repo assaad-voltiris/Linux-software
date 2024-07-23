@@ -243,40 +243,26 @@ bool Move(std::int32_t com_port, ReflectorState& reflector, double azimuth, doub
 bool MoveTo(std::int32_t com_port, ReflectorState& reflector, double target_azimuth, double target_elevation) {
   bool result = true;
 
-  double azimuth = 0;
-  double elevation = 0;
-  double prev_azimuth = 0;
-  double prev_elevation = 0;
+  const double& actual_az = reflector.actual_position_azimuth_mm;
+  const double& actual_el = reflector.actual_position_elevation_mm;
 
-  bool should_continue = false;
+  bool azimuth_reached = std::abs(actual_az - target_azimuth) < 1.f;
+  bool elevation_reached = std::abs(actual_el - target_elevation) < 1.f;
 
-  do {
-    result &= utils::ReadPositioningData(com_port, reflector);
-    if (!result) { throw std::runtime_error("Reflectors initial status reading error."); }
+  while (!(azimuth_reached && elevation_reached)) {
+    double az = target_azimuth;
+    double el = target_elevation;
 
-    azimuth = target_azimuth;
-    elevation = target_elevation;
-    prev_azimuth = reflector.actual_position_azimuth_mm;
-    prev_elevation = reflector.actual_position_elevation_mm;
+    if (std::abs(actual_az - az) > kMaxSecu) { az = actual_az + (target_azimuth - actual_az) / std::abs(target_azimuth - actual_az) * (kMaxSecu - 1.00); }
+    if (std::abs(actual_el - el) > kMaxSecu) { el = actual_el + (target_elevation - actual_el) / std::abs(target_elevation - actual_el) * (kMaxSecu - 1.00); }
 
-    if (std::abs(reflector.actual_position_azimuth_mm - target_azimuth) > kMaxSecu) {
-      azimuth = reflector.actual_position_azimuth_mm +
-                (target_azimuth - reflector.actual_position_azimuth_mm) / std::abs(target_azimuth - reflector.actual_position_azimuth_mm) * (kMaxSecu - 1.00);
-    }
-    if (std::abs(reflector.actual_position_elevation_mm - target_elevation) > kMaxSecu) {
-      elevation = reflector.actual_position_elevation_mm + (target_elevation - reflector.actual_position_elevation_mm) /
-                                                               std::abs(target_elevation - reflector.actual_position_elevation_mm) * (kMaxSecu - 1.00);
-    }
-
-    result &= utils::Move(com_port, reflector, azimuth, elevation);
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    result &= utils::Move(com_port, reflector, az, el);
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
     result &= utils::ReadPositioningData(com_port, reflector);
 
-    if (!result) { throw std::runtime_error("Reflectors movement error."); }
-
-    should_continue = azimuth != target_azimuth || elevation != target_elevation;
-    should_continue &= prev_azimuth != reflector.actual_position_azimuth_mm || prev_elevation != reflector.actual_position_elevation_mm;
-  } while (should_continue);
+    azimuth_reached = std::abs(actual_az - target_azimuth) < 1.f;
+    elevation_reached = std::abs(actual_el - target_elevation) < 1.f;
+  }
 
   return result;
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <optional>
 #include <string>
 
 namespace voltiris::controller {
@@ -48,6 +49,10 @@ struct ReflectorState {
   double calibration_azimuth_deg;      // Calibration position AZ(degree) of reflector
 
   double st_spacing = 5.0;
+
+  std::optional<double> should_be_moved_azimuth;
+  std::optional<double> should_be_moved_elevation;
+  bool should_be_calibrated;
 
   inline bool operator==(const ReflectorState& rhs) const {
     return id == rhs.id && com_id == rhs.com_id && line_num == rhs.line_num && latitude == rhs.latitude && longitude == rhs.longitude &&

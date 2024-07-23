@@ -144,9 +144,8 @@ void ReflectorsControllerCommandsProcessor::ProcessSetPositionCommand(const SetP
 void ReflectorsControllerCommandsProcessor::ProcessGoCommand(const GoCommand &command, std::int32_t com_port, std::vector<ReflectorState> &reflectors) {
   if (com_port == -1) { throw std::runtime_error("Reflectors not connected."); }
 
-  bool result = utils::MoveTo(com_port, reflectors[command.GetReflectorIndex()], command.GetAzimuth(), command.GetElevation());
-
-  if (!result) { throw std::runtime_error("Reflectors movement error."); }
+  reflectors[command.GetReflectorIndex()].should_be_moved_azimuth = command.GetAzimuth();
+  reflectors[command.GetReflectorIndex()].should_be_moved_elevation = command.GetElevation();
 }
 
 void ReflectorsControllerCommandsProcessor::ProcessManualMoveCommand(const ManualMoveCommand &command, std::int32_t com_port,
@@ -167,17 +166,27 @@ void ReflectorsControllerCommandsProcessor::ProcessManualMoveCommand(const Manua
   auto n_step = static_cast<std::size_t>(std::ceil(n_step_f));
 
   for (std::size_t reflector_index : command.GetReflectors()) {
-    for (std::size_t j = 0; j < n_step; j++) {
-      auto &reflector = reflectors[reflector_index];
+    auto &reflector = reflectors[reflector_index];
+    double delta_azimuth_mm = -(azimuth / reflector.a1);
+    double delta_elevation_mm = -((elevation / reflector.a3) - reflector.a2 * (azimuth / static_cast<double>(n_step)) / (reflector.a1 * reflector.a3));
 
-      double delta_azimuth_mm = -((azimuth / static_cast<double>(n_step)) / reflector.a1);
-      double delta_elevation_mm = -(((elevation / static_cast<double>(n_step)) / reflector.a3) -
-                                    reflector.a2 * (azimuth / static_cast<double>(n_step)) / (reflector.a1 * reflector.a3));
+    double target_pos_azimuth_mm = delta_azimuth_mm + reflector.actual_position_azimuth_mm;
+    double target_pos_elevation_mm = delta_elevation_mm + reflector.actual_position_elevation_mm;
 
-      double target_pos_azimuth_mm = delta_azimuth_mm + reflector.actual_position_azimuth_mm;
-      double target_pos_elevation_mm = delta_elevation_mm + reflector.actual_position_elevation_mm;
-      utils::MoveTo(com_port, reflector, target_pos_azimuth_mm, target_pos_elevation_mm);
-    }
+    reflector.should_be_moved_azimuth = target_pos_azimuth_mm;
+    reflector.should_be_moved_elevation = target_pos_elevation_mm;
+
+    //    for (std::size_t j = 0; j < n_step; j++) {
+    //      auto &reflector = reflectors[reflector_index];
+    //
+    //      double delta_azimuth_mm = -((azimuth / static_cast<double>(n_step)) / reflector.a1);
+    //      double delta_elevation_mm = -(((elevation / static_cast<double>(n_step)) / reflector.a3) -
+    //                                    reflector.a2 * (azimuth / static_cast<double>(n_step)) / (reflector.a1 * reflector.a3));
+    //
+    //      double target_pos_azimuth_mm = delta_azimuth_mm + reflector.actual_position_azimuth_mm;
+    //      double target_pos_elevation_mm = delta_elevation_mm + reflector.actual_position_elevation_mm;
+    //
+    //    }
   }
 }
 
