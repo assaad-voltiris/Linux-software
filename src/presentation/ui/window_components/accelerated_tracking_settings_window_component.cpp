@@ -6,6 +6,7 @@
 
 #include <imgui.h>
 
+#include <controller/commands/automatic_move_command.hpp>
 #include <controller/commands/values_update_command.hpp>
 #include <presentation/ui/utils/size.hpp>
 
@@ -48,7 +49,10 @@ void AcceleratedTrackingSettingsWindowComponent::Render(double scale) {
 
   // Left column
   ImGui::BeginGroup();
-  if (ImGui::Button("MOVE", utils::GetRealSize({60, 40}, static_cast<float>(scale)))) {}
+  if (ImGui::Button("MOVE", utils::GetRealSize({60, 40}, static_cast<float>(scale)))) {
+    SendCommand(
+        std::make_unique<controller::AutomaticMoveCommand>(_checkbox_400_0, _checkbox_to_theoretical_position, _checkbox_90_deg, _checkbox_initial_position));
+  }
 
   if (ImGui::Button("STOP", utils::GetRealSize({60, 40}, static_cast<float>(scale)))) {}
   ImGui::EndGroup();
@@ -59,21 +63,22 @@ void AcceleratedTrackingSettingsWindowComponent::Render(double scale) {
   ImGui::SameLine();
   ImGui::BeginGroup();
 
-  ImGui::BeginDisabled(!_checkbox_400_0_enabled);
   ImGui::Checkbox("400-0", &_checkbox_400_0);
-  ImGui::EndDisabled();
 
-  ImGui::BeginDisabled(!_checkbox_to_theoretical_position_enabled);
-  ImGui::Checkbox("to th. pos.", &_checkbox_to_theoretical_position);
-  ImGui::EndDisabled();
+  if (ImGui::Checkbox("to th. pos.", &_checkbox_to_theoretical_position) && _checkbox_to_theoretical_position) {
+    _checkbox_90_deg = false;
+    _checkbox_initial_position = false;
+  }
 
-  ImGui::BeginDisabled(!_checkbox_90_deg_enabled);
-  ImGui::Checkbox("Perp. to Sun", &_checkbox_90_deg);
-  ImGui::EndDisabled();
+  if (ImGui::Checkbox("Perp. to Sun", &_checkbox_90_deg) && _checkbox_90_deg) {
+    _checkbox_to_theoretical_position = false;
+    _checkbox_initial_position = false;
+  }
 
-  ImGui::BeginDisabled(!_checkbox_initial_position_enabled);
-  ImGui::Checkbox("to init pos.", &_checkbox_initial_position);
-  ImGui::EndDisabled();
+  if (ImGui::Checkbox("to init pos.", &_checkbox_initial_position) && _checkbox_initial_position) {
+    _checkbox_to_theoretical_position = false;
+    _checkbox_90_deg = false;
+  }
 
   ImGui::EndGroup();
 

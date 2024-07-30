@@ -11,6 +11,7 @@ add_executable(${PROJECT_NAME}
 
         src/presentation/client/client.cpp
 
+        src/controller/commands/automatic_move_command.cpp
         src/controller/commands/reflectors_controller_command.cpp
         src/controller/commands/connect_command.cpp
         src/controller/commands/disconnect_command.cpp

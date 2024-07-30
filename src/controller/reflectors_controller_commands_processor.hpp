@@ -7,6 +7,7 @@
 #include <queue>
 #include <thread>
 
+#include <controller/commands/automatic_move_command.hpp>
 #include <controller/commands/reflectors_controller_command_visitor.hpp>
 #include <controller/controller_commands_handler.hpp>
 #include <controller/controller_update_listener.hpp>
@@ -26,6 +27,7 @@ public:
   static void ProcessSetPositionCommand(const SetPositionCommand &command, std::int32_t com_port, std::vector<ReflectorState> &reflectors);
   static void ProcessGoCommand(const GoCommand &command, std::int32_t com_port, std::vector<ReflectorState> &reflectors);
   static void ProcessManualMoveCommand(const ManualMoveCommand &command, std::int32_t com_port, std::vector<ReflectorState> &reflectors);
+  static void ProcessAutomaticMoveCommand(const AutomaticMoveCommand &command, std::vector<ReflectorState> &reflectors);
 };
 
 }  // namespace voltiris::controller

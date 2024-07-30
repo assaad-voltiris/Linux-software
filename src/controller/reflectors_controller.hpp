@@ -41,6 +41,7 @@ private:
   void ProcessCommand(const ManualMoveCommand &command) override;
   void ProcessCommand(const StartTrackingCommand &command) override;
   void ProcessCommand(const StopTrackingCommand &command) override;
+  void ProcessCommand(const AutomaticMoveCommand &command) override;
 
 private:
   void ControllerThreadExecute();
@@ -50,6 +51,7 @@ private:
   void ProcessUpdates(const ReflectorsControllerIterationState &new_state);
   void ProcessTracking(const ReflectorsControllerIterationState &current_state);
   void ProcessSingleMovement();
+  void ProcessSingleCalibrationMovement(ReflectorState& reflector);
 
   ControllerUpdateListener *_update_listener = nullptr;
 

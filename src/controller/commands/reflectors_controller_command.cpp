@@ -2,6 +2,7 @@
 
 #include <nlohmann/json.hpp>
 
+#include <controller/commands/automatic_move_command.hpp>
 #include <controller/commands/connect_command.hpp>
 #include <controller/commands/disconnect_command.hpp>
 #include <controller/commands/flash_command.hpp>
@@ -50,6 +51,8 @@ std::unique_ptr<ReflectorsControllerCommand> ReflectorsControllerCommand::FromJs
     return std::make_unique<StartTrackingCommand>(json.template get<StartTrackingCommand>());
   } else if (json["id"] == "StopTracking") {
     return std::make_unique<StopTrackingCommand>(json.template get<StopTrackingCommand>());
+  } else if (json["id"] == "AutomaticMove") {
+    return std::make_unique<AutomaticMoveCommand>(json.template get<AutomaticMoveCommand>());
   }
   return nullptr;
 }

@@ -267,4 +267,11 @@ bool MoveTo(std::int32_t com_port, ReflectorState& reflector, double target_azim
   return result;
 }
 
+bool MoveOn(std::int32_t com_port, ReflectorState& reflector, double delta_azimuth, double delta_elevation) {
+  const double& actual_az = reflector.actual_position_azimuth_mm;
+  const double& actual_el = reflector.actual_position_elevation_mm;
+
+  return MoveTo(com_port, reflector, actual_az + delta_azimuth, actual_el + delta_elevation);
+}
+
 }  // namespace voltiris::controller::utils

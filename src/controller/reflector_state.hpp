@@ -53,6 +53,8 @@ struct ReflectorState {
   std::optional<double> should_be_moved_azimuth;
   std::optional<double> should_be_moved_elevation;
   bool should_be_calibrated;
+  std::int16_t calibration_cycles = 1;
+  bool calibration_doubleclicked = false;
 
   inline bool operator==(const ReflectorState& rhs) const {
     return id == rhs.id && com_id == rhs.com_id && line_num == rhs.line_num && latitude == rhs.latitude && longitude == rhs.longitude &&
