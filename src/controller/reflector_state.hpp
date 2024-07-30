@@ -52,7 +52,7 @@ struct ReflectorState {
 
   std::optional<double> should_be_moved_azimuth;
   std::optional<double> should_be_moved_elevation;
-  bool should_be_calibrated;
+  bool should_be_calibrated = false;
   std::int16_t calibration_cycles = 1;
   bool calibration_doubleclicked = false;
 
