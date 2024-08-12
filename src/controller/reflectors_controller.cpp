@@ -426,6 +426,9 @@ void ReflectorsController::ProcessSingleCalibrationMovement(ReflectorState &refl
     reflector.azimuth_is_max = false;
     reflector.elevation_is_min = false;
     result = utils::SetPosition(_com_port, reflector, 0, 400);
+    result &= utils::Flash(_com_port, reflector);
+    result &= utils::Reboot(_com_port, reflector);
+    result &= utils::ReadPositioningData(_com_port, reflector);
     ++reflector.calibration_cycles;
     reflector.should_be_calibrated = kCalibrationCycles == reflector.calibration_cycles ? false : reflector.should_be_calibrated;
   } else if (reflector.azimuth_is_max) {
