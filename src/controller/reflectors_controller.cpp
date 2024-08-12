@@ -420,7 +420,7 @@ void ReflectorsController::ProcessSingleCalibrationMovement(ReflectorState &refl
   }
 
   reflector.azimuth_is_max = reflector.actual_status_azimuth == 3 || reflector.azimuth_is_max;
-  reflector.elevation_is_min = reflector.actual_status_elevation == 3 || reflector.elevation_is_min;
+  reflector.elevation_is_min = reflector.actual_status_elevation == 4 || reflector.elevation_is_min;
 
   if (reflector.azimuth_is_max || reflector.elevation_is_min) {
     result &= utils::Flash(_com_port, reflector);
