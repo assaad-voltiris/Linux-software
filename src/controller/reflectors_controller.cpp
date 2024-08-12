@@ -439,11 +439,13 @@ void ReflectorsController::ProcessSingleCalibrationMovement(ReflectorState &refl
     result &= utils::Reboot(_com_port, reflector);
     result &= utils::ReadPositioningData(_com_port, reflector);
     az_delta = 10;
+    el_delta = 0;
     reflector.azimuth_is_max = false;
   } else if (reflector.elevation_is_min) {
     result &= utils::Flash(_com_port, reflector);
     result &= utils::Reboot(_com_port, reflector);
     result &= utils::ReadPositioningData(_com_port, reflector);
+    az_delta = 0;
     el_delta = -10;
     reflector.elevation_is_min = false;
   }
