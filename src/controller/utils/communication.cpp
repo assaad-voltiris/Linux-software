@@ -18,7 +18,7 @@ namespace {
 
 std::string to_bytes(char* buffer, std::size_t size) {
   std::stringstream ss;
-  for (std::size_t i = 0; i < size && buffer[i] != '\0'; ++i) { ss << std::hex << buffer[i] << " "; }
+  for (std::size_t i = 0; i < size && buffer[i] != '\0'; ++i) { ss << std::hex << (int)buffer[i] << " "; }
   return ss.str();
 }
 

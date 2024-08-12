@@ -415,13 +415,17 @@ void ReflectorsController::ProcessSingleCalibrationMovement(ReflectorState &refl
     result &= utils::SetPosition(_com_port, reflector, 400, reflector.actual_position_elevation_mm);
     result &= utils::Flash(_com_port, reflector);
     result &= utils::Reboot(_com_port, reflector);
+    result &= utils::WakeUp(_com_port, reflector);
     result &= utils::ReadPositioningData(_com_port, reflector);
+    return;
   }
   if (reflector.actual_position_elevation_mm >= 400 || reflector.actual_status_elevation == 2) {
     result &= utils::SetPosition(_com_port, reflector, reflector.actual_position_azimuth_mm, 0);
     result &= utils::Flash(_com_port, reflector);
     result &= utils::Reboot(_com_port, reflector);
+    result &= utils::WakeUp(_com_port, reflector);
     result &= utils::ReadPositioningData(_com_port, reflector);
+    return;
   }
 
   reflector.azimuth_is_max = reflector.actual_status_azimuth == 3 || reflector.azimuth_is_max;
