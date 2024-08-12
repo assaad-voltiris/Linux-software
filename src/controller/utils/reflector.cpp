@@ -294,7 +294,7 @@ bool StepMoveTo(std::int32_t com_port, ReflectorState& reflector, double target_
   if (std::abs(actual_el - el) > kMaxSecu) { el = actual_el + (target_elevation - actual_el) / std::abs(target_elevation - actual_el) * (kMaxSecu - 1.00); }
 
   result &= utils::Move(com_port, reflector, az, el);
-  std::this_thread::sleep_for(std::chrono::milliseconds(500));
+  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
   result &= utils::ReadPositioningData(com_port, reflector);
 
   return result;
