@@ -308,7 +308,7 @@ bool StepMoveTo(std::int32_t com_port, ReflectorState& reflector, double target_
     moved = std::abs(actual_az - initial_az) > 1. || std::abs(actual_el - initial_el) > 1.;
 
     initial_az = actual_az;
-    initial_el = initial_el;
+    initial_el = actual_el;
   }
 
   return result;
