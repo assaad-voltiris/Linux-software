@@ -419,7 +419,7 @@ void ReflectorsController::ProcessSingleCalibrationMovement(ReflectorState &refl
   reflector.azimuth_is_max = reflector.actual_status_azimuth == 3 || reflector.azimuth_is_max;
   reflector.elevation_is_min = reflector.actual_status_elevation == 3 || reflector.actual_status_elevation == 4 || reflector.elevation_is_min;
 
-  double az_delta = reflector.azimuth_is_max ? 0. : -15.;
+  double az_delta = reflector.azimuth_is_max ? 0. : -10.;
   double el_delta = reflector.elevation_is_min ? 0. : 10.;
 
   if (reflector.azimuth_is_max && reflector.elevation_is_min) {
@@ -432,7 +432,7 @@ void ReflectorsController::ProcessSingleCalibrationMovement(ReflectorState &refl
     result &= utils::Flash(_com_port, reflector);
     result &= utils::Reboot(_com_port, reflector);
     result &= utils::ReadPositioningData(_com_port, reflector);
-    az_delta = 15;
+    az_delta = 10;
     reflector.azimuth_is_max = false;
   } else if (reflector.elevation_is_min) {
     result &= utils::Flash(_com_port, reflector);
@@ -445,7 +445,7 @@ void ReflectorsController::ProcessSingleCalibrationMovement(ReflectorState &refl
   if (reflector.should_be_calibrated) {
     if (reflector.calibration_cycles == kCalibrationDoubleclickCycle && !reflector.calibration_doubleclicked) {
       az_delta = 20;
-      el_delta = -30;
+      el_delta = -20;
     }
 
     result = utils::StepMoveOn(_com_port, reflector, az_delta, el_delta);
