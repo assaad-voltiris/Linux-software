@@ -241,15 +241,23 @@ bool Move(std::int32_t com_port, ReflectorState& reflector, double azimuth, doub
 }
 
 bool MoveTo(std::int32_t com_port, ReflectorState& reflector, double target_azimuth, double target_elevation) {
+  static const std::uint64_t kMoveAttempts = 2;
+
   bool result = true;
+
+  std::uint64_t move_attempts = 0;
 
   const double& actual_az = reflector.actual_position_azimuth_mm;
   const double& actual_el = reflector.actual_position_elevation_mm;
 
   bool azimuth_reached = std::abs(actual_az - target_azimuth) < 1.f;
   bool elevation_reached = std::abs(actual_el - target_elevation) < 1.f;
+  bool move_attempts_reached = false;
 
-  while (!(azimuth_reached && elevation_reached)) {
+  while (!(azimuth_reached && elevation_reached) && !move_attempts_reached) {
+    const double before_move_az = actual_az;
+    const double before_move_el = actual_el;
+
     double az = target_azimuth;
     double el = target_elevation;
 
@@ -262,7 +270,32 @@ bool MoveTo(std::int32_t com_port, ReflectorState& reflector, double target_azim
 
     azimuth_reached = std::abs(actual_az - target_azimuth) < 1.f;
     elevation_reached = std::abs(actual_el - target_elevation) < 1.f;
+
+    bool moved_az = std::abs(actual_az - before_move_az) > 1.f;
+    bool moved_el = std::abs(actual_el - before_move_el) > 1.f;
+
+    if (!(moved_az && moved_el)) { ++move_attempts; }
+    move_attempts_reached = move_attempts == kMoveAttempts;
   }
+
+  return result;
+}
+
+bool StepMoveTo(std::int32_t com_port, ReflectorState& reflector, double target_azimuth, double target_elevation) {
+  bool result = true;
+
+  const double& actual_az = reflector.actual_position_azimuth_mm;
+  const double& actual_el = reflector.actual_position_elevation_mm;
+
+  double az = target_azimuth;
+  double el = target_elevation;
+
+  if (std::abs(actual_az - az) > kMaxSecu) { az = actual_az + (target_azimuth - actual_az) / std::abs(target_azimuth - actual_az) * (kMaxSecu - 1.00); }
+  if (std::abs(actual_el - el) > kMaxSecu) { el = actual_el + (target_elevation - actual_el) / std::abs(target_elevation - actual_el) * (kMaxSecu - 1.00); }
+
+  result &= utils::Move(com_port, reflector, az, el);
+  std::this_thread::sleep_for(std::chrono::milliseconds(500));
+  result &= utils::ReadPositioningData(com_port, reflector);
 
   return result;
 }
@@ -272,6 +305,13 @@ bool MoveOn(std::int32_t com_port, ReflectorState& reflector, double delta_azimu
   const double& actual_el = reflector.actual_position_elevation_mm;
 
   return MoveTo(com_port, reflector, actual_az + delta_azimuth, actual_el + delta_elevation);
+}
+
+bool StepMoveOn(std::int32_t com_port, ReflectorState& reflector, double delta_azimuth, double delta_elevation) {
+  const double& actual_az = reflector.actual_position_azimuth_mm;
+  const double& actual_el = reflector.actual_position_elevation_mm;
+
+  return StepMoveTo(com_port, reflector, actual_az + delta_azimuth, actual_el + delta_elevation);
 }
 
 }  // namespace voltiris::controller::utils

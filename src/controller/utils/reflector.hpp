@@ -30,6 +30,10 @@ bool Move(std::int32_t com_port, ReflectorState& reflector, double azimuth, doub
 
 bool MoveTo(std::int32_t com_port, ReflectorState &reflector, double target_azimuth, double target_elevation);
 
+bool StepMoveTo(std::int32_t com_port, ReflectorState &reflector, double target_azimuth, double target_elevation);
+
 bool MoveOn(std::int32_t com_port, ReflectorState &reflector, double delta_azimuth, double delta_elevation);
+
+bool StepMoveOn(std::int32_t com_port, ReflectorState &reflector, double delta_azimuth, double delta_elevation);
 
 }  // namespace voltiris::controller::utils
