@@ -293,9 +293,23 @@ bool StepMoveTo(std::int32_t com_port, ReflectorState& reflector, double target_
   if (std::abs(actual_az - az) > kMaxSecu) { az = actual_az + (target_azimuth - actual_az) / std::abs(target_azimuth - actual_az) * (kMaxSecu - 1.00); }
   if (std::abs(actual_el - el) > kMaxSecu) { el = actual_el + (target_elevation - actual_el) / std::abs(target_elevation - actual_el) * (kMaxSecu - 1.00); }
 
+  double initial_az = actual_az;
+  double initial_el = actual_el;
+
   result &= utils::Move(com_port, reflector, az, el);
-  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
   result &= utils::ReadPositioningData(com_port, reflector);
+
+  bool moved = true;
+  while ((std::abs(actual_az - az) < 1. || std::abs(actual_el - el) < 1.) && moved) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    result &= utils::ReadPositioningData(com_port, reflector);
+
+    moved = std::abs(actual_az - initial_az) > 1. || std::abs(actual_el - initial_el) > 1.;
+
+    initial_az = actual_az;
+    initial_el = initial_el;
+  }
 
   return result;
 }
