@@ -91,12 +91,12 @@ bool Read(std::int32_t port_handler, std::string& msg, const std::chrono::millis
     if (kBufferSize <= receive_buffer_begin) { throw std::runtime_error("Receive buffer overflow."); }
 
     read(port_handler, &receive_buffer[receive_buffer_begin], kBufferSize - receive_buffer_begin);
-    spdlog::debug("Received data before preprocessing: {} [{}]", receive_buffer, to_bytes(receive_buffer, kBufferSize));
+    // spdlog::debug("Received data before preprocessing: {} [{}]", receive_buffer, to_bytes(receive_buffer, kBufferSize));
     receive_buffer_begin = clean_buffer(receive_buffer, kBufferSize);
   }
 
   msg = receive_buffer;
-  spdlog::debug("Received data: {}", msg);
+  spdlog::debug("Received data: {} [{}]", msg, to_bytes(receive_buffer, kBufferSize));
 
   std::this_thread::sleep_for(std::chrono::milliseconds(200));
 

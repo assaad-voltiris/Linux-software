@@ -400,6 +400,8 @@ void ReflectorsController::ProcessSingleCalibrationMovement(ReflectorState &refl
 
   bool result = false;
 
+  result &= utils::ReadPositioningData(_com_port, reflector);
+
   bool is_azimuth_min = reflector.actual_status_azimuth == 1;
   bool is_azimuth_max = reflector.actual_status_azimuth == 2;
   bool is_elevation_min = reflector.actual_status_elevation == 1;
@@ -430,6 +432,7 @@ void ReflectorsController::ProcessSingleCalibrationMovement(ReflectorState &refl
     result &= utils::Reboot(_com_port, reflector);
     result &= utils::ReadPositioningData(_com_port, reflector);
     ++reflector.calibration_cycles;
+    spdlog::info("For reflector {} calibration cycle increased, current value: {}", reflector.id, reflector.calibration_cycles);
     reflector.should_be_calibrated = kCalibrationCycles == reflector.calibration_cycles ? false : reflector.should_be_calibrated;
   } else if (reflector.azimuth_is_max) {
     result &= utils::Flash(_com_port, reflector);
