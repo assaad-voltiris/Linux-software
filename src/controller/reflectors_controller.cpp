@@ -400,12 +400,14 @@ void ReflectorsController::ProcessSingleCalibrationMovement(ReflectorState &refl
 
   bool result = false;
 
-  bool is_azimuth_min = reflector.actual_position_azimuth_mm <= 0 || reflector.actual_status_azimuth == 1;
-  bool is_elevation_max = reflector.actual_position_azimuth_mm <= 0 || reflector.actual_status_azimuth == 1;
+  bool is_azimuth_min = reflector.actual_status_azimuth == 1;
+  bool is_azimuth_max = reflector.actual_status_azimuth == 2;
+  bool is_elevation_min = reflector.actual_status_elevation == 1;
+  bool is_elevation_max = reflector.actual_status_elevation == 2;
 
-  if (is_azimuth_min || is_elevation_max) {
-    double temp_pos_az = is_azimuth_min ? 200 : reflector.actual_position_azimuth_mm;
-    double temp_pos_el = is_elevation_max ? 200 : reflector.actual_position_elevation_mm;
+  if (is_azimuth_min || is_azimuth_max || is_elevation_min || is_elevation_max) {
+    double temp_pos_az = is_azimuth_min || is_azimuth_max ? 200 : reflector.actual_position_azimuth_mm;
+    double temp_pos_el = is_elevation_min || is_elevation_max ? 200 : reflector.actual_position_elevation_mm;
     result &= utils::SetPosition(_com_port, reflector, temp_pos_az, temp_pos_el);
     result &= utils::Flash(_com_port, reflector);
     result &= utils::Reboot(_com_port, reflector);
@@ -415,7 +417,7 @@ void ReflectorsController::ProcessSingleCalibrationMovement(ReflectorState &refl
   }
 
   reflector.azimuth_is_max = reflector.actual_status_azimuth == 3 || reflector.azimuth_is_max;
-  reflector.elevation_is_min = reflector.actual_status_elevation == 4 || reflector.elevation_is_min;
+  reflector.elevation_is_min = reflector.actual_status_elevation == 3 || reflector.actual_status_elevation == 4 || reflector.elevation_is_min;
 
   double az_delta = reflector.azimuth_is_max ? 0. : -15.;
   double el_delta = reflector.elevation_is_min ? 0. : 10.;
@@ -431,11 +433,13 @@ void ReflectorsController::ProcessSingleCalibrationMovement(ReflectorState &refl
     result &= utils::Reboot(_com_port, reflector);
     result &= utils::ReadPositioningData(_com_port, reflector);
     az_delta = 15;
+    reflector.azimuth_is_max = false;
   } else if (reflector.elevation_is_min) {
     result &= utils::Flash(_com_port, reflector);
     result &= utils::Reboot(_com_port, reflector);
     result &= utils::ReadPositioningData(_com_port, reflector);
     el_delta = -10;
+    reflector.elevation_is_min = false;
   }
 
   if (reflector.should_be_calibrated) {
