@@ -14,7 +14,15 @@
 
 namespace voltiris::controller::utils {
 
-namespace {}  // namespace
+namespace {
+
+std::string to_bytes(char* buffer, std::size_t size) {
+  std::stringstream ss;
+  for (std::size_t i = 0; i < size && buffer[i] != '\0'; ++i) { ss << std::hex << buffer[i] << " "; }
+  return ss.str();
+}
+
+}  // namespace
 
 std::vector<std::string> GetAvailablePorts() {
   std::vector<std::string> port_names;
@@ -83,7 +91,7 @@ bool Read(std::int32_t port_handler, std::string& msg, const std::chrono::millis
     if (kBufferSize <= receive_buffer_begin) { throw std::runtime_error("Receive buffer overflow."); }
 
     read(port_handler, &receive_buffer[receive_buffer_begin], kBufferSize - receive_buffer_begin);
-    spdlog::debug("Received data before preprocessing: {}", receive_buffer);
+    spdlog::debug("Received data before preprocessing: {} [{}]", receive_buffer, to_bytes(receive_buffer, kBufferSize));
     receive_buffer_begin = clean_buffer(receive_buffer, kBufferSize);
   }
 
