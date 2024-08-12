@@ -112,66 +112,48 @@ void ReflectorsController::ProcessCommand(const ValuesUpdateCommand &command) {
 
 void ReflectorsController::ProcessCommand(const ConnectCommand &command) {
   spdlog::debug("ConnectCommand received.");
-  _status = ControllerStatus::kCommunicating;
-  _update_listener->OnUpdate(std::make_unique<StatusUpdate>(_status));
   _com_port = ReflectorsControllerCommandsProcessor::ProcessConnectCommand(command, _com_port);
   if (_com_port != -1) { _update_listener->OnUpdate(std::make_unique<BusConnectedUpdate>()); }
 }
 
 void ReflectorsController::ProcessCommand(const DisconnectCommand &command) {
   spdlog::debug("DisconnectCommand received.");
-  _status = ControllerStatus::kCommunicating;
-  _update_listener->OnUpdate(std::make_unique<StatusUpdate>(_status));
   _com_port = ReflectorsControllerCommandsProcessor::ProcessDisconnectCommand(command, _com_port);
   _update_listener->OnUpdate(std::make_unique<BusDisconnectedUpdate>());
 }
 
 void ReflectorsController::ProcessCommand(const InitializationCommand &command) {
   spdlog::debug("InitializationCommand received.");
-  _status = ControllerStatus::kCommunicating;
-  _update_listener->OnUpdate(std::make_unique<StatusUpdate>(_status));
   ReflectorsControllerCommandsProcessor::ProcessInitializationCommand(command, _com_port, _reflectors);
 }
 
 void ReflectorsController::ProcessCommand(const ReadCommand &command) {
   spdlog::debug("ReadCommand received.");
-  _status = ControllerStatus::kCommunicating;
-  _update_listener->OnUpdate(std::make_unique<StatusUpdate>(_status));
   ReflectorsControllerCommandsProcessor::ProcessReadCommand(command, _com_port, _reflectors);
 }
 
 void ReflectorsController::ProcessCommand(const FlashCommand &command) {
   spdlog::debug("FlashCommand received.");
-  _status = ControllerStatus::kCommunicating;
-  _update_listener->OnUpdate(std::make_unique<StatusUpdate>(_status));
   ReflectorsControllerCommandsProcessor::ProcessFlashCommand(command, _com_port, _reflectors);
 }
 
 void ReflectorsController::ProcessCommand(const RebootCommand &command) {
   spdlog::debug("RebootCommand received.");
-  _status = ControllerStatus::kCommunicating;
-  _update_listener->OnUpdate(std::make_unique<StatusUpdate>(_status));
   ReflectorsControllerCommandsProcessor::ProcessRebootCommand(command, _com_port, _reflectors);
 }
 
 void ReflectorsController::ProcessCommand(const SetPositionCommand &command) {
   spdlog::debug("SetPositionCommand received.");
-  _status = ControllerStatus::kCommunicating;
-  _update_listener->OnUpdate(std::make_unique<StatusUpdate>(_status));
   ReflectorsControllerCommandsProcessor::ProcessSetPositionCommand(command, _com_port, _reflectors);
 }
 
 void ReflectorsController::ProcessCommand(const GoCommand &command) {
   spdlog::debug("GoCommand received.");
-  _status = ControllerStatus::kMoving;
-  _update_listener->OnUpdate(std::make_unique<StatusUpdate>(_status));
   ReflectorsControllerCommandsProcessor::ProcessGoCommand(command, _com_port, _reflectors);
 }
 
 void ReflectorsController::ProcessCommand(const ManualMoveCommand &command) {
   spdlog::debug("MoveCommand received.");
-  _status = ControllerStatus::kMoving;
-  _update_listener->OnUpdate(std::make_unique<StatusUpdate>(_status));
   ReflectorsControllerCommandsProcessor::ProcessManualMoveCommand(command, _com_port, _reflectors);
 }
 
@@ -204,6 +186,11 @@ void ReflectorsController::ProcessCommand(const StopTrackingCommand &command) {
   _internal_state.is_tracking = false;
   _internal_state.is_night = false;
   _internal_state.is_night_returned = false;
+  for (auto &reflector : _reflectors) {
+    reflector.should_be_calibrated = false;
+    reflector.should_be_moved_azimuth.reset();
+    reflector.should_be_moved_elevation.reset();
+  }
 }
 
 void ReflectorsController::ProcessCommand(const AutomaticMoveCommand &command) {
@@ -394,10 +381,12 @@ void ReflectorsController::ProcessSingleMovement() {
 
     if (!reflector.should_be_moved_azimuth.has_value() && !reflector.should_be_moved_elevation.has_value()) { continue; }
 
-    utils::MoveTo(_com_port, reflector, target_az, target_el);
+    utils::StepMoveTo(_com_port, reflector, target_az, target_el);
 
-    reflector.should_be_moved_azimuth.reset();
-    reflector.should_be_moved_elevation.reset();
+    if (std::abs(reflector.actual_position_azimuth_mm - target_az) < 1.0) { reflector.should_be_moved_azimuth.reset(); }
+    if (std::abs(reflector.actual_position_elevation_mm - target_el) < 1.0) { reflector.should_be_moved_elevation.reset(); }
+
+    utils::ReadPositioningData(_com_port, reflector);
 
     ReflectorsControllerCommandsProcessor::ProcessReadCommand(ReadCommand{}, _com_port, _reflectors);
 
@@ -420,7 +409,7 @@ void ReflectorsController::ProcessSingleCalibrationMovement(ReflectorState &refl
     result &= utils::ReadPositioningData(_com_port, reflector);
     return;
   }
-  if (reflector.actual_position_elevation_mm >= 400 || reflector.actual_status_elevation == 2) {
+  if (reflector.actual_position_elevation_mm >= 399 || reflector.actual_status_elevation == 2) {
     result &= utils::WakeUp(_com_port, reflector);
     result &= utils::SetPosition(_com_port, reflector, reflector.actual_position_azimuth_mm, 1);
     result &= utils::Flash(_com_port, reflector);
@@ -448,7 +437,7 @@ void ReflectorsController::ProcessSingleCalibrationMovement(ReflectorState &refl
       el_delta = 15;
     }
 
-    result = utils::MoveOn(_com_port, reflector, az_delta, el_delta);
+    result = utils::StepMoveOn(_com_port, reflector, az_delta, el_delta);
 
     reflector.calibration_doubleclicked = reflector.calibration_cycles == kCalibrationDoubleclickCycle || reflector.calibration_doubleclicked;
   }
