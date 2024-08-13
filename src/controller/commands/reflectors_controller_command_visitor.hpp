@@ -17,6 +17,7 @@ class ManualMoveCommand;
 class StartTrackingCommand;
 class StopTrackingCommand;
 class AutomaticMoveCommand;
+class StopMovementCommand;
 
 class ReflectorsControllerCommandVisitor {
 public:
@@ -43,6 +44,7 @@ public:
   virtual void ProcessCommand(const StopTrackingCommand&) = 0;
 
   virtual void ProcessCommand(const AutomaticMoveCommand&) = 0;
+  virtual void ProcessCommand(const StopMovementCommand&) = 0;
 };
 
 }  // namespace voltiris::controller

@@ -17,6 +17,7 @@
 #include <controller/commands/start_tracking_command.hpp>
 #include <controller/commands/stop_tracking_command.hpp>
 #include <controller/commands/values_update_command.hpp>
+#include <controller/commands/stop_movement_command.hpp>
 
 namespace voltiris::controller {
 
@@ -53,6 +54,8 @@ std::unique_ptr<ReflectorsControllerCommand> ReflectorsControllerCommand::FromJs
     return std::make_unique<StopTrackingCommand>(json.template get<StopTrackingCommand>());
   } else if (json["id"] == "AutomaticMove") {
     return std::make_unique<AutomaticMoveCommand>(json.template get<AutomaticMoveCommand>());
+  } else if (json["id"] == "StopMovement") {
+    return std::make_unique<StopMovementCommand>(json.template get<StopMovementCommand>());
   }
   return nullptr;
 }

@@ -7,6 +7,7 @@
 #include <imgui.h>
 
 #include <controller/commands/automatic_move_command.hpp>
+#include <controller/commands/stop_movement_command.hpp>
 #include <controller/commands/values_update_command.hpp>
 #include <presentation/ui/utils/size.hpp>
 
@@ -54,7 +55,7 @@ void AcceleratedTrackingSettingsWindowComponent::Render(double scale) {
         std::make_unique<controller::AutomaticMoveCommand>(_checkbox_400_0, _checkbox_to_theoretical_position, _checkbox_90_deg, _checkbox_initial_position));
   }
 
-  if (ImGui::Button("STOP", utils::GetRealSize({60, 40}, static_cast<float>(scale)))) {}
+  if (ImGui::Button("STOP", utils::GetRealSize({60, 40}, static_cast<float>(scale)))) { SendCommand(std::make_unique<controller::StopMovementCommand>()); }
   ImGui::EndGroup();
 
   ImGui::SameLine();

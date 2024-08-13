@@ -23,7 +23,6 @@ public:
   void Stop();
 
   inline void RegisterDataObserver(ControllerUpdateListener &update_listener) { _update_listener = &update_listener; }
-  void ProcessCommand(const RequestConfigurationCommand &command) override;
 
 private:
   void OnCommand(std::unique_ptr<ReflectorsControllerCommand> command) override;
@@ -42,6 +41,8 @@ private:
   void ProcessCommand(const StartTrackingCommand &command) override;
   void ProcessCommand(const StopTrackingCommand &command) override;
   void ProcessCommand(const AutomaticMoveCommand &command) override;
+  void ProcessCommand(const RequestConfigurationCommand &command) override;
+  void ProcessCommand(const StopMovementCommand &command) override;
 
 private:
   void ControllerThreadExecute();
@@ -51,7 +52,7 @@ private:
   void ProcessUpdates(const ReflectorsControllerIterationState &new_state);
   void ProcessTracking(const ReflectorsControllerIterationState &current_state);
   void ProcessSingleMovement();
-  void ProcessSingleCalibrationMovement(ReflectorState& reflector);
+  void ProcessSingleCalibrationMovement(ReflectorState &reflector);
 
   ControllerUpdateListener *_update_listener = nullptr;
 

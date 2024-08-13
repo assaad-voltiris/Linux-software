@@ -30,6 +30,7 @@
 #include <controller/commands/read_command.hpp>
 #include <controller/commands/reboot_command.hpp>
 #include <controller/commands/set_position_command.hpp>
+#include <controller/commands/stop_movement_command.hpp>
 #include <controller/commands/values_update_command.hpp>
 
 #include <controller/utils/communication.hpp>
@@ -186,6 +187,14 @@ void ReflectorsController::ProcessCommand(const StopTrackingCommand &command) {
   _internal_state.is_tracking = false;
   _internal_state.is_night = false;
   _internal_state.is_night_returned = false;
+  for (auto &reflector : _reflectors) {
+    reflector.should_be_calibrated = false;
+    reflector.should_be_moved_azimuth.reset();
+    reflector.should_be_moved_elevation.reset();
+  }
+}
+
+void ReflectorsController::ProcessCommand(const StopMovementCommand &command) {
   for (auto &reflector : _reflectors) {
     reflector.should_be_calibrated = false;
     reflector.should_be_moved_azimuth.reset();
@@ -418,7 +427,7 @@ void ReflectorsController::ProcessSingleCalibrationMovement(ReflectorState &refl
     return;
   }
 
-  reflector.azimuth_is_max = reflector.actual_status_azimuth == 3 || reflector.azimuth_is_max;
+  reflector.azimuth_is_max = reflector.actual_status_azimuth == 3 || reflector.actual_status_azimuth == 4 || reflector.azimuth_is_max;
   reflector.elevation_is_min = reflector.actual_status_elevation == 3 || reflector.actual_status_elevation == 4 || reflector.elevation_is_min;
 
   double az_delta = reflector.azimuth_is_max ? 0. : -10.;
@@ -441,14 +450,12 @@ void ReflectorsController::ProcessSingleCalibrationMovement(ReflectorState &refl
     result &= utils::ReadPositioningData(_com_port, reflector);
     az_delta = 0;
     reflector.azimuth_is_max = false;
-    return;
   } else if (reflector.elevation_is_min) {
     result &= utils::Flash(_com_port, reflector);
     result &= utils::Reboot(_com_port, reflector);
     result &= utils::ReadPositioningData(_com_port, reflector);
     el_delta = 0;
     reflector.elevation_is_min = false;
-    return;
   }
 
   if (reflector.should_be_calibrated) {
