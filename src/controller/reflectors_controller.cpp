@@ -437,8 +437,8 @@ bool ReflectorsController::ProcessSingleCalibrationMovement(ReflectorState &refl
     return true;
   }
 
-  bool azimuth_cycles = reflector.calibration_azimuth_cycles.value_or(kCalibrationCycles + 1);
-  bool elevation_cycles = reflector.calibration_elevation_cycles.value_or(kCalibrationCycles + 1);
+  std::size_t azimuth_cycles = reflector.calibration_azimuth_cycles.value_or(kCalibrationCycles + 1);
+  std::size_t elevation_cycles = reflector.calibration_elevation_cycles.value_or(kCalibrationCycles + 1);
   bool move_azimuth = azimuth_cycles == elevation_cycles;
 
   reflector.azimuth_is_max = reflector.actual_status_azimuth == 3 || reflector.actual_status_azimuth == 4 || reflector.azimuth_is_max;
