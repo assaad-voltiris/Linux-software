@@ -493,10 +493,11 @@ bool ReflectorsController::ProcessSingleCalibrationMovement(ReflectorState &refl
     }
 
     if (azimuth_cycles == kCalibrationDoubleclickCycle && !reflector.calibration_doubleclicked_azimuth) {
+      spdlog::info("Calibration azimuth move backward");
       result &= utils::StepMoveOn(_com_port, reflector, 20, 0);
       result &= utils::ReadPositioningData(_com_port, reflector);
       reflector.calibration_doubleclicked_azimuth = true;
-      return
+      return true;
     }
 
     result &= utils::StepMoveOn(_com_port, reflector, -10, 0);
@@ -546,10 +547,11 @@ bool ReflectorsController::ProcessSingleCalibrationMovement(ReflectorState &refl
     }
 
     if (elevation_cycles == kCalibrationDoubleclickCycle && !reflector.calibration_doubleclicked_elevation) {
+      spdlog::info("Calibration elevation move backward");
       result &= utils::StepMoveOn(_com_port, reflector, 0, -20);
       result &= utils::ReadPositioningData(_com_port, reflector);
       reflector.calibration_doubleclicked_elevation = true;
-      return
+      return true;
     }
 
     result &= utils::StepMoveOn(_com_port, reflector, 0, 10);
