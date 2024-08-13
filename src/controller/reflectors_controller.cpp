@@ -443,20 +443,40 @@ bool ReflectorsController::ProcessSingleCalibrationMovement(ReflectorState &refl
 
   reflector.azimuth_is_max = reflector.actual_status_azimuth == 3 || reflector.actual_status_azimuth == 4 || reflector.azimuth_is_max;
   reflector.elevation_is_min = reflector.actual_status_elevation == 3 || reflector.actual_status_elevation == 4 || reflector.elevation_is_min;
-//
+  //
   //  double az_delta = reflector.azimuth_is_max ? 0. : -10.;
   //  double el_delta = reflector.elevation_is_min ? 0. : 10.;
 
   if (move_azimuth) {
+    spdlog::info("Calibration azimuth, cycle: {}; status: {}", azimuth_cycles, reflector.actual_status_azimuth);
     if (reflector.azimuth_is_max && reflector.calibration_azimuth_cycles.has_value() && reflector.calibration_azimuth_cycles.value() == kCalibrationCycles) {
+      spdlog::info("Calibration azimuth last cycle finished, status: {}", reflector.actual_status_azimuth);
       reflector.calibration_azimuth_cycles.reset();
+      result &= utils::WakeUp(_com_port, reflector);
+      result &= utils::SetPosition(_com_port, reflector, 0, reflector.actual_position_elevation_mm);
+      result &= utils::WakeUp(_com_port, reflector);
+      result &= utils::Flash(_com_port, reflector);
+      result &= utils::WakeUp(_com_port, reflector);
+      result &= utils::Reboot(_com_port, reflector);
+      result &= utils::WakeUp(_com_port, reflector);
+      result &= utils::ReadPositioningData(_com_port, reflector);
       return true;
     } else if (reflector.azimuth_is_max && reflector.calibration_azimuth_cycles.has_value()) {
+      spdlog::info("Calibration azimuth last cycle {} finished, status: {}", azimuth_cycles, reflector.actual_status_azimuth);
       reflector.calibration_azimuth_cycles = reflector.calibration_azimuth_cycles.value() + 1;
+      result &= utils::WakeUp(_com_port, reflector);
+      result &= utils::SetPosition(_com_port, reflector, 0, reflector.actual_position_elevation_mm);
+      result &= utils::WakeUp(_com_port, reflector);
+      result &= utils::Flash(_com_port, reflector);
+      result &= utils::WakeUp(_com_port, reflector);
+      result &= utils::Reboot(_com_port, reflector);
+      result &= utils::WakeUp(_com_port, reflector);
+      result &= utils::ReadPositioningData(_com_port, reflector);
       return true;
     }
 
     if (reflector.elevation_is_min) {
+      spdlog::info("Calibration azimuth elevation moved back to continue.");
       result &= utils::StepMoveOn(_com_port, reflector, 0, -20);
       result &= utils::ReadPositioningData(_com_port, reflector);
       result &= utils::WakeUp(_com_port, reflector);
@@ -471,16 +491,36 @@ bool ReflectorsController::ProcessSingleCalibrationMovement(ReflectorState &refl
     result &= utils::StepMoveOn(_com_port, reflector, -10, 0);
     result &= utils::ReadPositioningData(_com_port, reflector);
   } else {
+    spdlog::info("Calibration elevation, cycle: {}; status: {}", elevation_cycles, reflector.actual_status_elevation);
     if (reflector.elevation_is_min && reflector.calibration_elevation_cycles.has_value() &&
         reflector.calibration_elevation_cycles.value() == kCalibrationCycles) {
+      spdlog::info("Calibration elevation last cycle finished, status: {}", reflector.actual_status_elevation);
       reflector.calibration_elevation_cycles.reset();
+      result &= utils::WakeUp(_com_port, reflector);
+      result &= utils::SetPosition(_com_port, reflector, reflector.actual_position_azimuth_mm, 400);
+      result &= utils::WakeUp(_com_port, reflector);
+      result &= utils::Flash(_com_port, reflector);
+      result &= utils::WakeUp(_com_port, reflector);
+      result &= utils::Reboot(_com_port, reflector);
+      result &= utils::WakeUp(_com_port, reflector);
+      result &= utils::ReadPositioningData(_com_port, reflector);
       return true;
     } else if (reflector.elevation_is_min && reflector.calibration_elevation_cycles.has_value()) {
+      spdlog::info("Calibration elevation last cycle {} finished, status: {}", elevation_cycles, reflector.actual_status_elevation);
       reflector.calibration_elevation_cycles = reflector.calibration_elevation_cycles.value() + 1;
+      result &= utils::WakeUp(_com_port, reflector);
+      result &= utils::SetPosition(_com_port, reflector, reflector.actual_position_azimuth_mm, 400);
+      result &= utils::WakeUp(_com_port, reflector);
+      result &= utils::Flash(_com_port, reflector);
+      result &= utils::WakeUp(_com_port, reflector);
+      result &= utils::Reboot(_com_port, reflector);
+      result &= utils::WakeUp(_com_port, reflector);
+      result &= utils::ReadPositioningData(_com_port, reflector);
       return true;
     }
 
     if (reflector.azimuth_is_max) {
+      spdlog::info("Calibration elevation azimuth moved back to continue.");
       result &= utils::StepMoveOn(_com_port, reflector, 20, 0);
       result &= utils::ReadPositioningData(_com_port, reflector);
       result &= utils::WakeUp(_com_port, reflector);
