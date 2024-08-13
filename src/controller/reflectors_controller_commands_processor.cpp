@@ -195,7 +195,8 @@ void ReflectorsControllerCommandsProcessor::ProcessAutomaticMoveCommand(const Au
     if (command.GetCalibrate()) {
       reflector.calibration_azimuth_cycles = 0;
       reflector.calibration_elevation_cycles = 0;
-      reflector.calibration_doubleclicked = false;
+      reflector.calibration_doubleclicked_azimuth = false;
+      reflector.calibration_doubleclicked_elevation = false;
     }
   }
 }
