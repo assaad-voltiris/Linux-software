@@ -438,7 +438,6 @@ void ReflectorsController::ProcessSingleCalibrationMovement(ReflectorState &refl
     result &= utils::Flash(_com_port, reflector);
     result &= utils::Reboot(_com_port, reflector);
     result &= utils::ReadPositioningData(_com_port, reflector);
-    az_delta = 10;
     el_delta = 0;
     reflector.azimuth_is_max = false;
   } else if (reflector.elevation_is_min) {
@@ -446,7 +445,6 @@ void ReflectorsController::ProcessSingleCalibrationMovement(ReflectorState &refl
     result &= utils::Reboot(_com_port, reflector);
     result &= utils::ReadPositioningData(_com_port, reflector);
     az_delta = 0;
-    el_delta = -10;
     reflector.elevation_is_min = false;
   }
 
@@ -456,7 +454,8 @@ void ReflectorsController::ProcessSingleCalibrationMovement(ReflectorState &refl
       el_delta = -20;
     }
 
-    result = utils::StepMoveOn(_com_port, reflector, az_delta, el_delta);
+    result &= utils::StepMoveOn(_com_port, reflector, az_delta, el_delta);
+    result &= utils::ReadPositioningData(_com_port, reflector);
 
     reflector.calibration_doubleclicked = reflector.calibration_cycles == kCalibrationDoubleclickCycle || reflector.calibration_doubleclicked;
   }
