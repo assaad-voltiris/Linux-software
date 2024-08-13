@@ -192,9 +192,11 @@ void ReflectorsControllerCommandsProcessor::ProcessManualMoveCommand(const Manua
 
 void ReflectorsControllerCommandsProcessor::ProcessAutomaticMoveCommand(const AutomaticMoveCommand &command, std::vector<ReflectorState> &reflectors) {
   for (auto &reflector : reflectors) {
-    reflector.should_be_calibrated = true;
-    reflector.calibration_cycles = 1;
-    reflector.calibration_doubleclicked = false;
+    if (command.GetCalibrate()) {
+      reflector.calibration_azimuth_cycles = 0;
+      reflector.calibration_elevation_cycles = 0;
+      reflector.calibration_doubleclicked = false;
+    }
   }
 }
 

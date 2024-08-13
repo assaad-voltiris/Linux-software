@@ -189,6 +189,9 @@ void ReflectorsController::ProcessCommand(const StopTrackingCommand &command) {
   _internal_state.is_night_returned = false;
   for (auto &reflector : _reflectors) {
     reflector.should_be_calibrated = false;
+    reflector.calibration_doubleclicked = false;
+    reflector.calibration_azimuth_cycles.reset();
+    reflector.calibration_elevation_cycles.reset();
     reflector.should_be_moved_azimuth.reset();
     reflector.should_be_moved_elevation.reset();
   }
@@ -197,6 +200,9 @@ void ReflectorsController::ProcessCommand(const StopTrackingCommand &command) {
 void ReflectorsController::ProcessCommand(const StopMovementCommand &command) {
   for (auto &reflector : _reflectors) {
     reflector.should_be_calibrated = false;
+    reflector.calibration_doubleclicked = false;
+    reflector.calibration_azimuth_cycles.reset();
+    reflector.calibration_elevation_cycles.reset();
     reflector.should_be_moved_azimuth.reset();
     reflector.should_be_moved_elevation.reset();
   }
@@ -380,10 +386,7 @@ void ReflectorsController::ProcessTracking(const ReflectorsControllerIterationSt
 
 void ReflectorsController::ProcessSingleMovement() {
   for (auto &reflector : _reflectors) {
-    if (reflector.should_be_calibrated) {
-      ProcessSingleCalibrationMovement(reflector);
-      return;
-    }
+    if (ProcessSingleCalibrationMovement(reflector)) { return; }
 
     double target_az = reflector.should_be_moved_azimuth.has_value() ? reflector.should_be_moved_azimuth.value() : reflector.actual_position_azimuth_mm;
     double target_el = reflector.should_be_moved_elevation.has_value() ? reflector.should_be_moved_elevation.value() : reflector.actual_position_elevation_mm;
@@ -403,11 +406,13 @@ void ReflectorsController::ProcessSingleMovement() {
   }
 }
 
-void ReflectorsController::ProcessSingleCalibrationMovement(ReflectorState &reflector) {
-  static const std::int16_t kCalibrationCycles = 3;
-  static const std::int16_t kCalibrationDoubleclickCycle = 2;
+bool ReflectorsController::ProcessSingleCalibrationMovement(ReflectorState &reflector) {
+  static const std::int16_t kCalibrationCycles = 2;
+  static const std::int16_t kCalibrationDoubleclickCycle = 1;
 
   bool result = false;
+
+  if (!reflector.calibration_azimuth_cycles.has_value() && !reflector.calibration_elevation_cycles.has_value()) { return false; }
 
   result &= utils::ReadPositioningData(_com_port, reflector);
 
@@ -419,56 +424,78 @@ void ReflectorsController::ProcessSingleCalibrationMovement(ReflectorState &refl
   if (is_azimuth_min || is_azimuth_max || is_elevation_min || is_elevation_max) {
     double temp_pos_az = is_azimuth_min || is_azimuth_max ? 200 : reflector.actual_position_azimuth_mm;
     double temp_pos_el = is_elevation_min || is_elevation_max ? 200 : reflector.actual_position_elevation_mm;
+    result &= utils::WakeUp(_com_port, reflector);
+    result &= utils::Reboot(_com_port, reflector);
+    result &= utils::WakeUp(_com_port, reflector);
     result &= utils::SetPosition(_com_port, reflector, temp_pos_az, temp_pos_el);
+    result &= utils::WakeUp(_com_port, reflector);
     result &= utils::Flash(_com_port, reflector);
+    result &= utils::WakeUp(_com_port, reflector);
     result &= utils::Reboot(_com_port, reflector);
     result &= utils::WakeUp(_com_port, reflector);
     result &= utils::ReadPositioningData(_com_port, reflector);
-    return;
+    return true;
   }
+
+  bool azimuth_cycles = reflector.calibration_azimuth_cycles.value_or(kCalibrationCycles + 1);
+  bool elevation_cycles = reflector.calibration_elevation_cycles.value_or(kCalibrationCycles + 1);
+  bool move_azimuth = azimuth_cycles == elevation_cycles;
 
   reflector.azimuth_is_max = reflector.actual_status_azimuth == 3 || reflector.actual_status_azimuth == 4 || reflector.azimuth_is_max;
   reflector.elevation_is_min = reflector.actual_status_elevation == 3 || reflector.actual_status_elevation == 4 || reflector.elevation_is_min;
+//
+  //  double az_delta = reflector.azimuth_is_max ? 0. : -10.;
+  //  double el_delta = reflector.elevation_is_min ? 0. : 10.;
 
-  double az_delta = reflector.azimuth_is_max ? 0. : -10.;
-  double el_delta = reflector.elevation_is_min ? 0. : 10.;
-
-  if (reflector.azimuth_is_max && reflector.elevation_is_min) {
-    reflector.azimuth_is_max = false;
-    reflector.elevation_is_min = false;
-    result = utils::SetPosition(_com_port, reflector, 0, 400);
-    result &= utils::Flash(_com_port, reflector);
-    result &= utils::Reboot(_com_port, reflector);
-    result &= utils::ReadPositioningData(_com_port, reflector);
-    ++reflector.calibration_cycles;
-    spdlog::info("For reflector {} calibration cycle increased, current value: {}", reflector.id, reflector.calibration_cycles);
-    reflector.should_be_calibrated = kCalibrationCycles == reflector.calibration_cycles ? false : reflector.should_be_calibrated;
-    return;
-  } else if (reflector.azimuth_is_max) {
-    result &= utils::Flash(_com_port, reflector);
-    result &= utils::Reboot(_com_port, reflector);
-    result &= utils::ReadPositioningData(_com_port, reflector);
-    az_delta = 0;
-    reflector.azimuth_is_max = false;
-  } else if (reflector.elevation_is_min) {
-    result &= utils::Flash(_com_port, reflector);
-    result &= utils::Reboot(_com_port, reflector);
-    result &= utils::ReadPositioningData(_com_port, reflector);
-    el_delta = 0;
-    reflector.elevation_is_min = false;
-  }
-
-  if (reflector.should_be_calibrated) {
-    if (reflector.calibration_cycles == kCalibrationDoubleclickCycle && !reflector.calibration_doubleclicked) {
-      az_delta = 20;
-      el_delta = -20;
+  if (move_azimuth) {
+    if (reflector.azimuth_is_max && reflector.calibration_azimuth_cycles.has_value() && reflector.calibration_azimuth_cycles.value() == kCalibrationCycles) {
+      reflector.calibration_azimuth_cycles.reset();
+      return true;
+    } else if (reflector.azimuth_is_max && reflector.calibration_azimuth_cycles.has_value()) {
+      reflector.calibration_azimuth_cycles = reflector.calibration_azimuth_cycles.value() + 1;
+      return true;
     }
 
-    result &= utils::StepMoveOn(_com_port, reflector, az_delta, el_delta);
-    result &= utils::ReadPositioningData(_com_port, reflector);
+    if (reflector.elevation_is_min) {
+      result &= utils::StepMoveOn(_com_port, reflector, 0, -20);
+      result &= utils::ReadPositioningData(_com_port, reflector);
+      result &= utils::WakeUp(_com_port, reflector);
+      result &= utils::Flash(_com_port, reflector);
+      result &= utils::WakeUp(_com_port, reflector);
+      result &= utils::Reboot(_com_port, reflector);
+      result &= utils::ReadPositioningData(_com_port, reflector);
+      reflector.elevation_is_min = false;
+      return true;
+    }
 
-    reflector.calibration_doubleclicked = reflector.calibration_cycles == kCalibrationDoubleclickCycle || reflector.calibration_doubleclicked;
+    result &= utils::StepMoveOn(_com_port, reflector, -10, 0);
+    result &= utils::ReadPositioningData(_com_port, reflector);
+  } else {
+    if (reflector.elevation_is_min && reflector.calibration_elevation_cycles.has_value() &&
+        reflector.calibration_elevation_cycles.value() == kCalibrationCycles) {
+      reflector.calibration_elevation_cycles.reset();
+      return true;
+    } else if (reflector.elevation_is_min && reflector.calibration_elevation_cycles.has_value()) {
+      reflector.calibration_elevation_cycles = reflector.calibration_elevation_cycles.value() + 1;
+      return true;
+    }
+
+    if (reflector.azimuth_is_max) {
+      result &= utils::StepMoveOn(_com_port, reflector, 20, 0);
+      result &= utils::ReadPositioningData(_com_port, reflector);
+      result &= utils::WakeUp(_com_port, reflector);
+      result &= utils::Flash(_com_port, reflector);
+      result &= utils::WakeUp(_com_port, reflector);
+      result &= utils::Reboot(_com_port, reflector);
+      result &= utils::ReadPositioningData(_com_port, reflector);
+      reflector.azimuth_is_max = false;
+      return true;
+    }
+
+    result &= utils::StepMoveOn(_com_port, reflector, 0, 10);
+    result &= utils::ReadPositioningData(_com_port, reflector);
   }
+  return true;
 }
 
 void ReflectorsController::ControllerThreadExecute() {

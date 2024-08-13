@@ -52,7 +52,7 @@ private:
   void ProcessUpdates(const ReflectorsControllerIterationState &new_state);
   void ProcessTracking(const ReflectorsControllerIterationState &current_state);
   void ProcessSingleMovement();
-  void ProcessSingleCalibrationMovement(ReflectorState &reflector);
+  bool ProcessSingleCalibrationMovement(ReflectorState &reflector);
 
   ControllerUpdateListener *_update_listener = nullptr;
 
