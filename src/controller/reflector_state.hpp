@@ -55,9 +55,17 @@ struct ReflectorState {
   bool should_be_calibrated = false;
   std::int16_t calibration_cycles = 1;
 
-  bool calibration_doubleclicked = false;
+  bool calibration_doubleclicked_azimuth = false;
+  bool calibration_doubleclicked_elevation = false;
   std::optional<std::size_t> calibration_azimuth_cycles;
   std::optional<std::size_t> calibration_elevation_cycles;
+
+  void ResetCalibration(){
+    calibration_doubleclicked_azimuth = false;
+    calibration_doubleclicked_elevation = false;
+    calibration_azimuth_cycles.reset();
+    calibration_elevation_cycles.reset();
+  }
 
   inline bool operator==(const ReflectorState& rhs) const {
     return id == rhs.id && com_id == rhs.com_id && line_num == rhs.line_num && latitude == rhs.latitude && longitude == rhs.longitude &&
