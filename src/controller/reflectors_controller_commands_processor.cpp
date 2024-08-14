@@ -198,6 +198,24 @@ void ReflectorsControllerCommandsProcessor::ProcessAutomaticMoveCommand(const Au
       reflector.calibration_doubleclicked_azimuth = false;
       reflector.calibration_doubleclicked_elevation = false;
     }
+
+    if (command.GetTheoreticalPosition()) {
+      reflector.should_be_moved_azimuth = reflector.theoretical_position_azimuth_mm;
+      reflector.should_be_moved_elevation = reflector.theoretical_position_elevation_mm;
+    }
+
+    if (command.GetInitPosition()) {
+      reflector.should_be_moved_azimuth = reflector.calibration_azimuth_mm;
+      reflector.should_be_moved_elevation = reflector.calibration_elevation_mm;
+    }
+
+    if (command.GetPerpToSun()) {
+      double offset = utils::ConvertAzimuth_Mm2Deg(reflector, reflector.theoretical_position_azimuth_mm) < 180 ? 90. : -90.;
+      double az = utils::ConvertAzimuth_Deg2Mm(reflector, utils::ConvertAzimuth_Mm2Deg(reflector, reflector.theoretical_position_azimuth_mm) + offset);
+
+      reflector.should_be_moved_azimuth = az;
+      reflector.should_be_moved_elevation = reflector.theoretical_position_elevation_mm;
+    }
   }
 }
 
